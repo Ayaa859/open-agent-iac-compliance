@@ -1,0 +1,4 @@
+requests
+python-hcl2
+datasets
+pandas

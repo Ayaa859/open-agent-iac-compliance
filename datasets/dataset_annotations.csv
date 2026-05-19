@@ -1,0 +1,1315 @@
+scenario_id,resource,difficulty,compliant,violations,nist_controls,intent
+scenario_000,"aws_cloudwatch_log_group, aws_cloudwatch_log_resource_policy, aws_route53_query_log, aws_route53_zone, aws_iam_policy_document",5,True,none,"AC-6, AU-2","Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has one ""aws_cloudwatch_log_group"" resource
+
+Ha"
+scenario_001,"aws_route53_vpc_association_authorization, aws_route53_zone, aws_route53_zone_association, aws_vpc, aws_vpc",3,True,none,NONE,"Has multiple ""aws_vpc"" resource
+    with a specified ""cidr_block""
+    with ""enable_dns_hostnames"" eq"
+scenario_002,"aws_elb, aws_route53_record, aws_route53_zone",3,False,missing_logging,"SC-8, AU-12","Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has a ""aws_elb"" resource
+    with ""name""
+    wi"
+scenario_003,"aws_db_instance, aws_db_instance, aws_db_instance, aws_db_instance, aws_route53_record, aws_route53_record, aws_route53_record, aws_route53_zone",6,True,none,AC-6,"Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has a ""aws_db_instance"" resource
+    with ""iden"
+scenario_004,"aws_db_instance, aws_db_instance, aws_db_subnet_group, aws_route53_record, aws_route53_record, aws_route53_zone, aws_route53_zone, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+    with a specified ""cidr_block""
+
+Has multiple ""aws_subnet"" resources
+  "
+scenario_005,"aws_db_instance, aws_db_instance, aws_db_instance, aws_route53_record, aws_route53_record, aws_route53_zone",4,True,none,AC-6,"Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has a ""aws_db_instance"" resource
+    with ""iden"
+scenario_006,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",4,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_007,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",5,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_008,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",5,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_009,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_application_version, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_s3_object, aws_sqs_queue",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_010,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_application_version, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_s3_object",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_011,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_application_version, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_route53_record, aws_route53_zone, aws_s3_bucket, aws_s3_object",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_012,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_route53_record, aws_route53_record, aws_route53_zone",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_013,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_route53_record, aws_route53_record, aws_route53_zone",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_014,"aws_db_instance, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",6,True,none,"AC-6, AC-3","Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_015,"aws_db_instance, aws_db_instance, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_016,"aws_db_instance, aws_db_snapshot, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_017,"aws_db_instance, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_018,"aws_db_instance, aws_db_subnet_group, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_internet_gateway, aws_route_table, aws_route_table_association, aws_route_table_association, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_019,"aws_db_instance, aws_db_subnet_group, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_internet_gateway, aws_route_table, aws_route_table_association, aws_route_table_association, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_020,"aws_route53_record, aws_route53_zone",2,True,none,NONE,"Has one ""aws_route53_zone"" resource
+    with ""name"" set to ""example53.com""
+
+Has one ""aws_route53_rec"
+scenario_021,"aws_route53_record, aws_route53_zone",2,True,none,NONE,"Has one ""aws_route53_zone"" resource
+    with ""name"" set to ""example53.com""
+
+Has one ""aws_route53_rec"
+scenario_022,"aws_route53_record, aws_route53_zone",2,True,none,NONE,"Has one ""aws_route53_zone"" resource
+    with ""name"" ending in "".in-addr.arpa""
+
+Has one ""aws_route53_"
+scenario_023,"aws_route53_record, aws_route53_zone",2,True,none,NONE,"Has one ""aws_route53_zone"" resource
+    with ""name"" set to ""example53.com""
+
+Has one ""aws_route53_rec"
+scenario_024,"aws_db_instance, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_route53_record, aws_route53_zone",5,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_025,"aws_db_instance, aws_db_instance, aws_elastic_beanstalk_application, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_route53_record, aws_route53_record, aws_route53_zone",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_026,"aws_db_instance, aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment, aws_route53_health_check, aws_route53_health_check, aws_route53_record, aws_route53_record, aws_route53_zone",6,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_027,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_environment, aws_iam_instance_profile, aws_iam_role, aws_iam_role_policy_attachment",4,True,none,AC-6,"Has one ""aws_iam_role"" resource
+    with ""name""
+    with ""assume_role_policy"" and ""Service"" set to """
+scenario_028,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_configuration_template",2,True,none,NONE,"Has one ""aws_elastic_beanstalk_application"" resource
+    with ""name""
+
+Has one ""aws_elastic_beanstalk"
+scenario_029,"aws_elastic_beanstalk_application, aws_elastic_beanstalk_configuration_template",2,True,none,NONE,"Has one ""aws_elastic_beanstalk_application"" resource
+    with ""name""
+
+Has one ""aws_elastic_beanstalk"
+scenario_030,aws_elastic_beanstalk_application,1,True,none,NONE,"Has one ""aws_elastic_beanstalk_application"" resource
+    with ""name"""
+scenario_031,"aws_elastic_beanstalk_application, aws_iam_role",3,True,none,AC-6,"Has one ""aws_elastic_beanstalk_application"" resource
+    with ""name""
+    with ""appversion_lifecycle"""
+scenario_032,"aws_elastic_beanstalk_application, aws_iam_role",3,True,none,AC-6,"Has one ""aws_elastic_beanstalk_application"" resource
+    with ""name""
+    with ""appversion_lifecycle"""
+scenario_033,"aws_codebuild_project, aws_iam_role",4,True,none,AC-6,"Has one ""aws_iam_role"" resource and one ""aws_codebuild_project"" resource with the ""type"" argument wi"
+scenario_034,"aws_codebuild_project, aws_iam_role, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_codebuild_project"" resou"
+scenario_035,"aws_codebuild_project, aws_iam_role",4,True,none,AC-6,"Has one ""aws_iam_role"" resource and one ""aws_codebuild_project"" resource with at least one ""environm"
+scenario_036,"aws_codebuild_project, aws_iam_role, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_codebuild_project"" resou"
+scenario_037,"aws_codebuild_project, aws_iam_role, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_codebuild_project"" resou"
+scenario_038,"aws_codebuild_project, aws_iam_role",4,True,none,AC-6,"Has one ""aws_iam_role"" resource and one ""aws_codebuild_project"" resource with a ""secondary_sources"" "
+scenario_039,"aws_codebuild_project, aws_iam_role, aws_s3_bucket, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, at least one ""aws_s3_bucket"" resource, and one ""aws_codebuild_proje"
+scenario_040,"aws_codebuild_project, aws_iam_role, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_codebuild_project"" resou"
+scenario_041,"aws_codebuild_project, aws_iam_role, aws_s3_bucket, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, at least one ""aws_s3_bucket"" resource, and one ""aws_codebuild_proje"
+scenario_042,"aws_lex_bot, aws_lex_intent",5,True,none,AC-6,"Has one resource ""aws_lex_bot"" and one resource ""aws_lex_intent"""
+scenario_043,"aws_lex_bot, aws_lex_intent",6,True,none,AC-6,"Has one resource ""aws_lex_bot"" and one resource ""aws_lex_intent""  with at least 2 slot blocks "
+scenario_044,"aws_lex_bot, aws_lex_intent, aws_lex_slot_type",6,True,none,AC-6,"Has one resource ""aws_lex_bot"" and one resource ""aws_lex_intent"" with followup question block (slot "
+scenario_045,"aws_lex_bot, aws_lex_intent",6,True,none,AC-6,"Has one resource ""aws_lex_bot"" and at least one resource ""aws_lex_intent"" with at least one user pro"
+scenario_046,"aws_lex_bot, aws_lex_intent",4,True,none,AC-6,"Has one resource ""aws_lex_bot"" with all arguments initialized and at least one ""aws_lex_intent"" reso"
+scenario_047,"aws_lex_bot, aws_lex_intent, aws_lex_intent, aws_lex_intent, aws_lex_intent, aws_lex_intent",6,True,none,AC-6,"Has one resource ""aws_lex_bot"" with 5 different intent blocks and 5 different ""aws_lex_intent"" resou"
+scenario_048,"aws_lex_bot, aws_lex_intent, aws_lex_intent, aws_lex_intent",4,True,none,AC-6,"Has one resource ""aws_lex_bot"" with ""child_directed"" = true and at least one ""aws_lex_intent"" resour"
+scenario_049,"aws_lex_bot, aws_lex_intent",4,True,none,AC-6,"Has one resource ""aws_lex_bot"" with argument ""enable_model_improvements"" = true
+ and argument ""nlu_i"
+scenario_050,"aws_iam_role, aws_lambda_function, aws_lambda_permission, aws_lex_bot, aws_lex_intent",5,True,none,AC-6,"Has one resource ""aws_lex_bot"" with at least one ""aws_lex_intent"" resource and a ""aws_lambda_functio"
+scenario_051,"aws_iam_role, aws_lexv2models_bot",3,True,none,AC-6,"Has one resource ""aws_iam_role"" and one resource ""aws_lexv2models_bot"""
+scenario_052,"aws_iam_role, aws_lexv2models_bot",3,True,none,AC-6,"Has one resource ""aws_iam_role"" and one resource ""aws_lexv2models_bot"" and ""child_directed"" = true"
+scenario_053,"aws_connect_bot_association, aws_connect_instance, aws_lex_bot, aws_lex_intent, aws_region",4,True,none,AC-6,"Has one resource ""aws_connect_instance"", at least one ""aws_lex_intent"" resource, one ""aws_lex_bot"" r"
+scenario_054,"aws_connect_bot_association, aws_connect_instance, aws_lex_bot, aws_lex_intent, aws_region",4,True,none,AC-6,"Has one resource ""aws_connect_instance"", at least one ""aws_lex_intent"" resource, one ""aws_lex_bot"" r"
+scenario_055,"aws_connect_bot_association, aws_connect_instance, aws_lex_bot, aws_lex_intent, aws_region",4,True,none,AC-6,"Has one resource ""aws_connect_instance"" with argument ""identity_management_type"" = SAML, at least on"
+scenario_056,aws_kinesis_stream,2,True,none,NONE,"Has one ""aws_kinesis_stream"" resource"
+scenario_057,"aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_kinesis_analytics_application, aws_kinesis_stream, aws_iam_policy_document, aws_iam_policy_document",5,True,none,AC-6,"Has one ""aws_kinesis_analytics_application"" resource with one ""aws_kinesis_stream"" resource as an in"
+scenario_058,"aws_iam_role, aws_kinesisanalyticsv2_application, aws_iam_policy_document",3,True,none,AC-6,"Has one ""aws_iam_role"" resource, and one ""aws_kinesisanalyticsv2_application"" with argument runtime_"
+scenario_059,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_s3_bucket, aws_iam_policy_document",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_kinesis_firehose_deliver"
+scenario_060,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_redshift_cluster, aws_s3_bucket, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, one ""aws_redshift_cluster"" resource, "
+scenario_061,"aws_elasticsearch_domain, aws_iam_role, aws_iam_role_policy, aws_kinesis_firehose_delivery_stream, aws_s3_bucket, aws_iam_policy_document, aws_iam_policy_document",5,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, one ""aws_elasticsearch_domain"" resour"
+scenario_062,"aws_iam_role, aws_iam_role_policy, aws_kinesis_firehose_delivery_stream, aws_opensearch_domain, aws_s3_bucket, aws_iam_policy_document, aws_iam_policy_document",5,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, one ""aws_opensearch_domain"" resource,"
+scenario_063,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_s3_bucket, aws_iam_policy_document",3,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_kinesis_firehose_deliver"
+scenario_064,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_opensearchserverless_collection, aws_opensearchserverless_security_policy, aws_s3_bucket, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, one ""aws_opensearchserverless_securit"
+scenario_065,"aws_elasticsearch_domain, aws_iam_role, aws_iam_role_policy, aws_kinesis_firehose_delivery_stream, aws_s3_bucket, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_iam_policy_document, aws_iam_policy_document",6,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, AC-3, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, one ""aws_elasticsearch_domain"" resour"
+scenario_066,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_s3_bucket, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_kinesis_firehose_deliver"
+scenario_067,"aws_iam_role, aws_iam_role_policy, aws_kinesis_firehose_delivery_stream, aws_opensearch_domain, aws_s3_bucket, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_iam_policy_document",6,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, AC-3, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, one ""aws_opensearch_domain"" resource,"
+scenario_068,aws_kinesis_video_stream,2,True,none,NONE,"Has one ""aws_kinesis_video_stream"" resource"
+scenario_069,"aws_kinesis_stream, aws_kinesis_stream_consumer",2,True,none,NONE,"Has one ""aws_kinesis_stream"" resource and one ""aws_kinesis_stream_consumer"" resource"
+scenario_070,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_s3_bucket, aws_iam_policy_document",3,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Has one ""aws_iam_role"" resource, one ""aws_s3_bucket"" resource, and one ""aws_kinesis_firehose_deliver"
+scenario_071,aws_kinesis_analytics_application,1,True,none,NONE,"Has one ""aws_kinesis_analytics_application"" resource"
+scenario_072,"aws_iam_role, aws_kinesisanalyticsv2_application, aws_iam_policy_document",3,True,none,AC-6,"Has one ""aws_iam_role"" resource, and one ""aws_kinesisanalyticsv2_application"" with argument runtime_"
+scenario_073,"aws_iam_role, aws_kinesisanalyticsv2_application, aws_iam_policy_document",3,True,none,AC-6,"Has one ""aws_cloudwatch_log_group"" resource, one ""aws_cloudwatch_log_stream"" resource, one ""aws_iam_"
+scenario_074,"aws_iam_role, aws_iam_role_policy, aws_kendra_data_source, aws_kendra_index",5,False,wildcard_permission,AC-6,"Has one ""aws_iam_role"" resource, one ""aws_kendra_index"" resource, and one ""aws_kendra_data_source"" r"
+scenario_075,"aws_iam_role, aws_iam_role_policy, aws_kendra_data_source, aws_kendra_index",5,False,wildcard_permission,AC-6,"Has one ""aws_iam_role"" resource, one ""aws_kendra_index"" resource, and one ""aws_kendra_data_source"" r"
+scenario_076,"aws_iam_role, aws_iam_role_policy, aws_kendra_index",6,False,wildcard_permission,AC-6,"Has one ""aws_iam_role"" resource and one ""aws_kendra_index"" resource with all default ""document_metad"
+scenario_077,"aws_iam_role, aws_iam_role_policy, aws_kendra_index",4,False,wildcard_permission,AC-6,"Has one ""aws_iam_role"" resource and one ""aws_kendra_index"" resource with the ""user_group_resolution_"
+scenario_078,aws_route53_zone,1,True,none,NONE,"Has one ""aws_route53_zone"" resource
+    with ""name"" set to ""example53.com"""
+scenario_079,"aws_route53_record, aws_route53_zone",2,True,none,NONE,"Has one ""aws_route53_zone"" resource
+    with ""name"" set to ""example53.com""
+
+Has one ""aws_route53_rec"
+scenario_080,"aws_route53_record, aws_route53_zone, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource
+    with a specified ""cidr_block""
+
+Has one ""aws_route53_zone"" resource
+  "
+scenario_081,"aws_route53_health_check, aws_route53_record, aws_route53_record, aws_route53_zone",4,True,none,AC-6,"Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has two ""aws_route53_record"" resources
+    The "
+scenario_082,"aws_route53_health_check, aws_route53_health_check, aws_route53_record, aws_route53_record, aws_route53_zone",4,True,none,AC-6,"Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has two ""aws_route53_record"" resources
+    The "
+scenario_083,"aws_cloudwatch_metric_alarm, aws_route53_health_check",3,True,none,AU-2,"Has one ""aws_cloudwatch_metric_alarm"""" resources
+    with ""alarm_name""
+    with ""comparison_operator"
+scenario_084,"aws_route53_record, aws_route53_record, aws_route53_zone",3,True,none,AC-6,"Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has two ""aws_route53_record"" resources
+    The "
+scenario_085,"aws_route53_record, aws_route53_record, aws_route53_zone",3,True,none,AC-6,"Has one ""aws_route53_zone"" resource
+    with ""name""
+
+Has two ""aws_route53_record"" resources
+    The "
+scenario_086,aws_route53_traffic_policy,3,True,none,AC-6,"Has one ""aws_route53_traffic_policy"" resource
+    with ""name"""
+scenario_087,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_iam_role_policy_attachment, aws_subnet, aws_vpc, aws_region",6,True,none,AC-6,"has one ""aws_eks_cluster"" resource
+with one ""name""
+with one ""role_arn""
+with one ""subnet_ids"" in ""vpc"
+scenario_088,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_subnet, aws_subnet, aws_vpc",5,True,none,AC-6,"has one ""aws_iam_role"" resource
+with one ""name""
+with one ""assume_role_policy""
+
+has one ""aws_iam_role"
+scenario_089,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_iam_role_policy_attachment, aws_subnet, aws_vpc, aws_region",6,True,none,AC-6,"has one ""aws_caller_identity"" data source named ""current""
+has one ""aws_ecr_image"" 
+with one ""reposit"
+scenario_090,"aws_eks_cluster, aws_eks_fargate_profile, aws_iam_role, aws_iam_role, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc, null_resource, aws_eks_cluster_auth",6,True,none,AC-6,"Resource ""aws_iam_role"" ""eks-fargate-profile""
+has one ""name""
+has one ""assume_role_policy""
+Resource """
+scenario_091,"aws_eks_access_entry, aws_eks_cluster, aws_iam_role, aws_subnet, aws_vpc",4,True,none,AC-6,"has one ""aws_eks_access_entry"" resource
+with one ""cluster_name""
+with one ""principal_arn""
+with one ""k"
+scenario_092,"aws_eks_access_policy_association, aws_eks_cluster, aws_iam_role, aws_iam_user, aws_subnet, aws_vpc",4,True,none,AC-6,"has one ""aws_eks_access_policy_association"" resource
+with one ""cluster_name""
+with one ""policy_arn""
+w"
+scenario_093,"aws_eks_addon, aws_eks_cluster, aws_iam_role, aws_subnet, aws_vpc",4,True,none,AC-6,"has one ""aws_eks_addon"" resource
+with one ""cluster_name""
+with one ""addon_name"""
+scenario_094,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc",5,True,none,AC-6,"has one ""aws_eks_cluster"" resource
+with one ""name""
+with one ""role_arn""
+with one ""vpc_config"" contain"
+scenario_095,"aws_eks_cluster, aws_eks_fargate_profile, aws_iam_role, aws_subnet, aws_subnet, aws_vpc",4,True,none,AC-6,"has one ""aws_eks_fargate_profile"" resource
+with one ""cluster_name""
+with one ""fargate_profile_name""
+w"
+scenario_096,"aws_iam_role, aws_iam_role_policy_attachment",3,True,none,AC-6,"has one ""aws_iam_role"" resource
+with one ""name""
+with one ""assume_role_policy""
+
+has one ""aws_iam_role"
+scenario_097,"aws_eks_cluster, aws_eks_identity_provider_config, aws_iam_role, aws_subnet, aws_subnet, aws_vpc",4,True,none,AC-6,"has one ""aws_eks_identity_provider_config"" resource
+with one ""cluster_name""
+with one ""oidc"" block co"
+scenario_098,"aws_eks_cluster, aws_eks_node_group, aws_iam_role, aws_iam_role_policy_attachment, aws_iam_role_policy_attachment, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","has one ""aws_eks_node_group"" resource
+with one ""cluster_name""
+with one ""node_group_name""
+with one ""n"
+scenario_099,"aws_eks_cluster, aws_eks_pod_identity_association, aws_iam_role, aws_iam_role, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc, aws_iam_policy_document",5,True,none,AC-6,"has one ""data"" block for ""aws_iam_policy_document"" named ""assume_role""
+with one ""statement"" block co"
+scenario_100,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc, aws_iam_policy_document",4,True,none,AC-6,"has one ""data"" block for ""aws_iam_policy_document"" containing:
+one ""effect""
+one ""principals"" block w"
+scenario_101,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc",4,True,none,AC-6,"has one ""aws_iam_role""
+with one ""name""
+with one ""assume_role_policy"" 
+
+has one ""aws_iam_role_policy_"
+scenario_102,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc",4,True,none,"AC-6, AC-3","has one ""aws_iam_role"" 
+with one ""name""
+with one ""assume_role_policy""
+
+has one ""aws_iam_role_policy_"
+scenario_103,"aws_eks_cluster, aws_iam_role, aws_iam_role_policy_attachment, aws_subnet, aws_subnet, aws_vpc",4,True,none,"AC-6, AC-3","has one ""aws_iam_role"" 
+with one ""name""
+with one ""assume_role_policy""
+
+has one ""aws_iam_role_policy_"
+scenario_104,"aws_s3_bucket, aws_s3_bucket_policy",3,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","has one ""aws_s3_bucket"" resource
+    with one ""bucket""
+
+has one ""aws_s3_bucket_policy""
+     with one"
+scenario_105,"aws_s3_bucket, aws_s3_bucket_metric, aws_s3_bucket_object",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","has one ""aws_s3_bucket"" resource
+    with one ""bucket""
+
+has one ""aws_s3_bucket_metric""
+    with one "
+scenario_106,"aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_public_access_block, aws_s3_bucket_server_side_encryption_configuration",4,False,"missing_encryption, missing_logging","AC-6, AC-3, AU-12","has one ""aws_s3_bucket"" resource
+    with one ""bucket""
+
+has one ""aws_s3_bucket_acl""
+    with one ""bu"
+scenario_107,"aws_s3_bucket, aws_s3_bucket_versioning",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one ""aws_s3_bucket_versioning"" resource
+     with bu"
+scenario_108,"aws_dynamodb_table, aws_s3_bucket, aws_s3_bucket_public_access_block, aws_s3_bucket_server_side_encryption_configuration, aws_s3_bucket_versioning",5,False,"missing_encryption, missing_logging","AC-6, AC-3, AU-12","has one aws_s3_bucket_versioning resource
+with bucket    
+with status
+
+has one aws_dynamodb_table re"
+scenario_109,"aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_lifecycle_configuration, aws_s3_bucket_versioning",4,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_acl resource
+with bucket 
+with acl"
+scenario_110,"aws_s3_bucket, aws_s3_bucket_logging",2,False,"missing_encryption, public_access_not_blocked","SC-28, AU-2","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_logging resource
+with bucket
+with "
+scenario_111,"aws_s3_bucket, aws_s3_bucket_object_lock_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_object_lock_configuration resource"
+scenario_112,"aws_s3_bucket, aws_s3_bucket_object_lock_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_object_lock_configuration resource"
+scenario_113,"aws_s3_bucket, aws_s3_bucket_request_payment_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_request_payment_configuration reso"
+scenario_114,"aws_s3_bucket, aws_s3_bucket_public_access_block",2,False,"missing_encryption, missing_logging","AC-6, AC-3, SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_public_access_block resource
+with "
+scenario_115,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls, aws_s3_bucket_policy, aws_s3_bucket_public_access_block",5,False,"missing_encryption, missing_logging, wildcard_permission","AC-6, AC-3, SC-28, AU-12","has one aws_s3_bucket resource
+with bucket
+
+has one aws_s3_bucket_acl resource
+with bucket
+with acl
+"
+scenario_116,"aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_policy",3,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","Resource ""aws_s3_bucket""
+has one ""bucket""
+
+Resource ""aws_s3_bucket_acl""
+has one ""bucket""
+has one ""ac"
+scenario_117,"aws_s3_bucket, aws_s3_bucket_notification, aws_sns_topic, aws_iam_policy_document",3,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","Data ""aws_iam_policy_document""
+has one ""effect""
+has one ""principals"" 
+has one ""actions""
+has one ""res"
+scenario_118,"aws_s3_bucket, aws_s3_bucket_object_lock_configuration, aws_s3_bucket_versioning",3,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Resource ""aws_s3_bucket""
+has one ""bucket""
+
+Resource ""aws_s3_bucket_versioning""
+has one ""bucket""
+with"
+scenario_119,"aws_kms_key, aws_s3_bucket, aws_s3_bucket_server_side_encryption_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked",AU-12,"Resource ""aws_kms_key""
+has one ""description""
+has one ""deletion_window_in_days""
+
+Resource ""aws_s3_buc"
+scenario_120,"aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Resource ""aws_s3_bucket""
+has one ""bucket""
+
+Resource ""aws_s3_bucket_ownership_controls""
+has one ""buck"
+scenario_121,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_acl, aws_s3_bucket_logging",3,False,"missing_encryption, public_access_not_blocked","SC-28, AU-2","Resource ""aws_s3_bucket""
+has one ""bucket""
+
+Resource ""aws_s3_bucket_acl"" 
+has one ""bucket""
+has one ""a"
+scenario_122,aws_s3_bucket_object,1,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Resource ""aws_s3_bucket_object""
+has one ""bucket""
+has one ""key""
+has one ""source""
+has one ""etag"""
+scenario_123,"aws_s3_bucket, aws_s3_bucket_ownership_controls",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Resource ""aws_s3_bucket"" 
+has one ""bucket""
+
+Resource ""aws_s3_bucket_ownership_controls""
+has one ""buc"
+scenario_124,aws_ami,2,True,none,NONE,create aws_ami resource with name = any
+scenario_125,aws_ami,2,True,none,NONE,create aws_ami resource with name = any
+scenario_126,"aws_instance, aws_ami",3,True,none,NONE,create aws_ami resource with cpu_count = 2 and cores_per_thread=2
+scenario_127,"aws_instance, aws_instance, aws_subnet, aws_subnet, aws_vpc, aws_ami",4,True,none,AC-6,"Create a VPC, 2 subnets, and ec2 instance in each subnet with latest Amazon Linux 2 AMI, with t2.mic"
+scenario_128,"aws_autoscaling_group, aws_ec2_fleet, aws_launch_template, aws_subnet, aws_subnet, aws_vpc, aws_ami",5,True,none,"AC-6, AC-3","Create VPC, public subnet in the VPC, private subnet in the VPC, aws_ec2_fleet with 5 spot and 4 on "
+scenario_129,"aws_db_instance, aws_instance, aws_instance, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3",
+scenario_130,"aws_efs_file_system, aws_efs_mount_target, aws_efs_mount_target, aws_instance, aws_instance, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,AC-6,
+scenario_131,"aws_instance, aws_placement_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,"AC-6, AC-3",
+scenario_132,aws_elasticache_cluster,2,True,none,NONE,"requires cluster id, engine=memcached, node_type, num_cache_nodes, parameter_group_name"
+scenario_133,aws_elasticache_cluster,1,True,none,NONE,"requires cluster id, engine=redis, node_type, num_cache_nodes, parameter_group_name"
+scenario_134,aws_elasticache_user,1,True,none,NONE,"requires access string, engine = REDIS, user id and user name"
+scenario_135,aws_elasticache_user,1,True,none,AC-6,"requires access string, engine = REDIS, user id and user name, authentication_mode {type = ""iam""}"
+scenario_136,aws_elasticache_user,2,True,none,NONE,"requires access string, engine = REDIS, user id and user name, authentication_mode {type= ""password"""
+scenario_137,"aws_elasticache_user, aws_elasticache_user_group",2,True,none,NONE,"creates elasticache user resources(requires access string, engine = REDIS, user id and user name) an"
+scenario_138,"aws_elasticache_user, aws_elasticache_user, aws_elasticache_user_group, aws_elasticache_user_group_association",3,True,none,NONE,creates elasticache user group and a user resource then associates the 2 using ids
+scenario_139,aws_redshift_cluster,1,True,none,NONE,"Has an aws_redshift_cluster resource and check cluster_type is ""single_node"" or number of nodes is 1"
+scenario_140,"aws_redshift_cluster, aws_redshift_usage_limit",2,True,none,NONE,"Has an aws_redshift_cluster resource and check cluster_type is ""single_node"" or number of nodes is 2"
+scenario_141,"aws_redshift_cluster, aws_redshift_endpoint_authorization",2,True,none,NONE,Has an aws_redshift_resouce with 2 nodes and creates a aws_redshift_endpoint_authorization resource 
+scenario_142,"aws_redshift_cluster, aws_redshift_snapshot_schedule, aws_redshift_snapshot_schedule_association",2,True,none,NONE,Has an aws_redshift resouce with 1 node and aws_redshift_snapshot_schedule resource with rate set to
+scenario_143,"aws_redshift_subnet_group, aws_subnet, aws_subnet, aws_vpc",3,True,none,NONE,"Create a VPC, create 2 subnets (1 in east1a and 1 in east1b) then create a redshift_subnet_group"
+scenario_144,"aws_internet_gateway, aws_redshift_cluster, aws_redshift_subnet_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,"AC-6, AC-3","Create a VPC, create internet_gateway,create 2 subnets (1 in east1a and 1 in east1b) then create a r"
+scenario_145,aws_redshift_cluster,2,True,none,NONE,Creates a redshift_clluster in us-east-1 and a snapshot_copy in us-east-2
+scenario_146,"aws_iam_role, aws_iam_role_policy_attachment, aws_redshift_cluster, aws_redshift_cluster_iam_roles",3,True,none,AC-6,"Create a aws_iam_role, aws_redshift_cluster, and attach the role to the cluster"
+scenario_147,"aws_redshift_cluster, aws_redshift_resource_policy",3,True,none,AC-6,Create a redshift cluster and a aws_reedshift_resource_poliicy attached to it
+scenario_148,"aws_redshift_cluster, aws_redshift_endpoint_access, aws_redshift_subnet_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,"AC-6, AC-3",Create a cluster and a endpoint associated with it
+scenario_149,"aws_iam_role, aws_lambda_function, archive_file, aws_iam_policy_document",3,True,none,AC-6,"Needs to have a defined IAM role. Data for a .zip file, with source file = lambda.js, function name "
+scenario_150,"aws_iam_role, aws_lambda_function, aws_lambda_function_url, archive_file, aws_iam_policy_document",3,True,none,AC-6,"Needs an aws_lambda_function defined(IAM role, zip). aws_lambda_function_url must have an authorizat"
+scenario_151,"aws_iam_role, aws_lambda_function, aws_lambda_invocation, archive_file, aws_iam_policy_document",3,True,none,AC-6,"Needs to have an aws_lambda_function defined (IAM role, zip). Use aws_lambda_invocation on the delca"
+scenario_152,"aws_dynamodb_table, aws_iam_role, aws_lambda_alias, aws_lambda_function, archive_file, aws_iam_policy_document",4,False,missing_encryption,"AC-6, SC-28","Needs to have an aws_lambda_function defined (IAM role, zip). Use aws_lambda_alias (need name, funct"
+scenario_153,"aws_dynamodb_table, aws_iam_role, aws_lambda_event_source_mapping, aws_lambda_function, archive_file, aws_iam_policy_document",4,False,missing_encryption,"AC-6, SC-28","Needs to have an aws_lambda_function defined (IAM role, zip). Create a DynamoDB table. Create lambda"
+scenario_154,aws_lambda_layer_version,1,True,none,NONE,"Create a aws_lambda_layer_version by using file_name = ""lambda_layer_payload.zip"". Layer name can be"
+scenario_155,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_lambda_function, aws_lambda_permission, archive_file, aws_iam_policy_document",4,True,none,"AC-6, AU-2",Needs to have an aws_lambda_function defined. Create a aws_cloudwatch_event_rule to trigger every 15
+scenario_156,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_lambda_function, archive_file, aws_iam_policy_document",4,True,none,"AC-6, AU-2",Needs to have an aws_lambda_function defined. Create a aws_cloudwatch_event_rule to trigger on EC2 c
+scenario_157,"aws_iam_role, aws_lambda_function, archive_file, aws_iam_policy_document",3,True,none,AC-6,"Create aws_lambda_function (IAM, zip)."
+scenario_158,"aws_iam_role, aws_lambda_function, archive_file, aws_iam_policy_document",3,True,none,AC-6,"Create aws_lambda_function (IAM, zip)."
+scenario_159,"aws_cloudwatch_composite_alarm, aws_cloudwatch_metric_alarm",2,True,none,AU-2,Creates an aws_cloudwatch_composite_alarm which requires at least one other aws_cloudwatch_metric_al
+scenario_160,aws_cloudwatch_metric_alarm,2,True,none,AU-2,Createsr a aws_cloudwatch_metric_alarm
+scenario_161,aws_cloudwatch_metric_alarm,2,True,none,AU-2,
+scenario_162,aws_dynamodb_contributor_insights,1,False,missing_encryption,SC-28,Create a DynamoDB table and enable contributor insights
+scenario_163,"aws_dynamodb_global_table, aws_dynamodb_table, aws_dynamodb_table",4,False,missing_encryption,"AC-6, SC-28",Create a DynamoDB Global Table v1(requires a name and at least one replica (regions))
+scenario_164,"aws_dynamodb_kinesis_streaming_destination, aws_dynamodb_table, aws_kinesis_stream",2,False,missing_encryption,SC-28,"create a stream_arn (name), dynamodb table(hash_key, name, attribute (name, type)), create the kines"
+scenario_165,aws_dynamodb_table,3,False,missing_encryption,SC-28,"dynamodb table -> hash_key, name, attribute (name, type), read_capacity = 20, write_capacity = 20"
+scenario_166,"aws_dynamodb_table, aws_dynamodb_table_item",3,False,missing_encryption,SC-28,"dynamodb table -> hash_key, name, attribute (name, type), read_capacity = x, write_capacity = x, cre"
+scenario_167,"aws_dynamodb_table, aws_dynamodb_table_replica",3,False,missing_encryption,SC-28,"dynamodb table -> hash_key, name, attribute (name, type) -> create a repilca with the table arn"
+scenario_168,"aws_dax_cluster, aws_iam_role",3,True,none,AC-6,"require a cluster name, iam_role_arn, node_type, replication factor"
+scenario_169,aws_dax_parameter_group,2,True,none,NONE,"require name of the group, list of parameters (key, value) pairs"
+scenario_170,"aws_dax_subnet_group, aws_subnet, aws_subnet, aws_vpc",3,True,none,NONE,create subnets -> create subnet groups
+scenario_171,aws_dynamodb_table,1,False,missing_encryption,SC-28,"dynamodb table -> hash_key, name, attribute (name, type), billing mode pay per read"
+scenario_172,"aws_iam_role, aws_sagemaker_domain, aws_subnet, aws_vpc, aws_iam_policy_document",3,True,none,AC-6,Has a sagemaker domain resources which requires a an iam role and a subnet
+scenario_173,"aws_iam_role, aws_sagemaker_domain, aws_sagemaker_user_profile, aws_subnet, aws_vpc, aws_iam_policy_document",4,True,none,AC-6,Has a sagemaker user profile resource which depends on a sagemaker domain resource
+scenario_174,"aws_iam_role, aws_sagemaker_domain, aws_sagemaker_space, aws_subnet, aws_vpc, aws_iam_policy_document",4,True,none,AC-6,
+scenario_175,"aws_iam_role, aws_sagemaker_app, aws_sagemaker_domain, aws_sagemaker_user_profile, aws_subnet, aws_vpc, aws_iam_policy_document",5,True,none,AC-6,
+scenario_176,aws_sagemaker_code_repository,1,True,none,NONE,
+scenario_177,"aws_iam_role, aws_sagemaker_image, aws_iam_policy_document",2,True,none,AC-6,
+scenario_178,"aws_iam_role, aws_sagemaker_model, aws_iam_policy_document, aws_sagemaker_prebuilt_ecr_image",3,True,none,AC-6,
+scenario_179,"aws_iam_role, aws_sagemaker_notebook_instance, aws_iam_policy_document, aws_sagemaker_prebuilt_ecr_image",3,True,none,AC-6,
+scenario_180,"aws_iam_role, aws_sagemaker_code_repository, aws_sagemaker_notebook_instance, aws_iam_policy_document, aws_sagemaker_prebuilt_ecr_image",3,True,none,AC-6,
+scenario_181,"aws_iam_role, aws_sagemaker_pipeline, aws_iam_policy_document, aws_sagemaker_prebuilt_ecr_image",3,True,none,AC-6,
+scenario_182,aws_sagemaker_human_task_ui,1,True,none,NONE,
+scenario_183,"aws_iam_role, aws_sagemaker_endpoint_configuration, aws_sagemaker_model, aws_iam_policy_document, aws_sagemaker_prebuilt_ecr_image",3,True,none,AC-6,
+scenario_184,"aws_iam_role, aws_sagemaker_endpoint, aws_sagemaker_endpoint_configuration, aws_sagemaker_model, aws_iam_policy_document, aws_sagemaker_prebuilt_ecr_image",3,True,none,AC-6,
+scenario_185,"aws_iam_role, aws_lambda_function, archive_file, aws_iam_policy_document",3,True,none,AC-6,"Needs to have a defined IAM role. Data for a .zip file, with source file = lambda.js, function name "
+scenario_186,"aws_instance, aws_ami",3,True,none,NONE,create aws_ami resource with cpu_count = 2 and cores_per_thread=2
+scenario_187,aws_ami,1,True,none,NONE,create aws_ami resource with name = any
+scenario_188,"aws_instance, aws_instance, aws_subnet, aws_subnet, aws_vpc, aws_ami",4,True,none,AC-6,"Create a VPC, 2 subnets, and ec2 instance in each subnet with latest Amazon Linux 2 AMI, with t2.mic"
+scenario_189,"aws_autoscaling_group, aws_ec2_fleet, aws_launch_template, aws_subnet, aws_subnet, aws_vpc, aws_ami",5,True,none,"AC-6, AC-3","Create VPC, public subnet in the VPC, private subnet in the VPC, aws_ec2_fleet with 5 spot and 4 on "
+scenario_190,"aws_db_instance, aws_instance, aws_instance, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3",
+scenario_191,"aws_efs_file_system, aws_efs_mount_target, aws_efs_mount_target, aws_instance, aws_instance, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,AC-6,
+scenario_192,"aws_instance, aws_placement_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,"AC-6, AC-3",
+scenario_193,aws_elasticache_cluster,1,True,none,NONE,"requires cluster id, engine=memcached, node_type, num_cache_nodes, parameter_group_name"
+scenario_194,aws_elasticache_user,1,True,none,NONE,"requires access string, engine = REDIS, user id and user name"
+scenario_195,aws_elasticache_user,1,True,none,AC-6,"requires access string, engine = REDIS, user id and user name, authentication_mode {type = ""iam""}"
+scenario_196,aws_elasticache_user,2,True,none,NONE,"requires access string, engine = REDIS, user id and user name, authentication_mode {type= ""password"""
+scenario_197,"aws_elasticache_user, aws_elasticache_user_group",2,True,none,NONE,
+scenario_198,aws_dynamodb_contributor_insights,1,False,missing_encryption,SC-28,Create a DynamoDB table and enable contributor insights
+scenario_199,"aws_dax_cluster, aws_iam_role",3,True,none,AC-6,"require a cluster name, iam_role_arn, node_type, replication factor"
+scenario_200,"aws_msk_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_msk_cluster"" resource
+with one ""number_of_broker_nodes"" = 3"
+scenario_201,"aws_msk_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_msk_cluster"" resource
+with one ""number_of_broker_nodes"" = 3
+Requires aws provider with "
+scenario_202,"aws_msk_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_msk_cluster"" resource
+with one ""number_of_broker_nodes"" = 3
+Requires aws provider with "
+scenario_203,"aws_cloudwatch_log_group, aws_msk_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3, AU-2","Has one ""aws_msk_cluster"" resource
+with one ""logging_info""
+with one ""broker_logs""
+with one ""cloudwat"
+scenario_204,"aws_cloudwatch_log_group, aws_msk_cluster, aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,False,"missing_encryption, public_access_not_blocked","AC-6, AC-3, SC-28, AU-2","Has one ""aws_msk_cluster"" resource
+with one ""logging_info""
+with one ""broker_logs""
+with one ""s3""
+with"
+scenario_205,"aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_msk_cluster, aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones, aws_iam_policy_document",6,False,"missing_encryption, public_access_not_blocked","AC-6, AC-3, SC-28","Has one ""aws_msk_cluster"" resource
+with one ""logging_info""
+with one ""broker_logs""
+with one ""firehose"
+scenario_206,"aws_kms_key, aws_msk_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_msk_cluster"" resource
+with one ""encryption_info""
+with one ""encryption_at_rest_kms_key_a"
+scenario_207,"aws_msk_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones, aws_iam_policy_document",6,True,none,"AC-6, AC-3","Has one ""aws_msk_cluster"" resource
+with one ""open_monitoring""
+with one ""prometheus""
+with one ""jmx_ex"
+scenario_208,"aws_msk_serverless_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",5,True,none,"AC-6, AC-3","Has one ""aws_msk_serverless_cluster"" resource
+Requires aws provider with alias of ""aws"" with a regio"
+scenario_209,"aws_msk_serverless_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",5,True,none,"AC-6, AC-3","Has one ""aws_msk_serverless_cluster"" resource
+with one ""vpc_config""
+with one ""subnet_ids"" with 6 ref"
+scenario_210,"aws_msk_serverless_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",5,True,none,"AC-6, AC-3","Has one ""aws_msk_serverless_cluster"" resource
+with one ""vpc_config""
+with one ""subnet_ids"" with 6 ref"
+scenario_211,"aws_msk_serverless_cluster, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",5,True,none,"AC-6, AC-3","Has one ""aws_msk_serverless_cluster"" resource
+Requires aws provider with alias of ""aws"" with a regio"
+scenario_212,"aws_cloudwatch_log_group, aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_kms_key, aws_msk_cluster, aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones, aws_iam_policy_document",6,False,"missing_encryption, public_access_not_blocked","AC-6, AC-3, AU-2","Has one ""aws_msk_cluster"" resource
+with one ""number_of_broker_nodes"" = 3
+with one ""logging_info""
+wit"
+scenario_213,"aws_iam_role, aws_msk_cluster, aws_mskconnect_connector, aws_mskconnect_custom_plugin, aws_s3_bucket, aws_s3_object, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,False,"missing_encryption, public_access_not_blocked","AC-6, AC-3","Has one ""aws_mskconnect_custom_plugin"" resource
+with one ""content_type"" = ""ZIP""
+with one ""location""
+"
+scenario_214,"aws_cloudwatch_log_group, aws_iam_role, aws_iam_role, aws_kinesis_firehose_delivery_stream, aws_kms_key, aws_msk_cluster, aws_mskconnect_connector, aws_mskconnect_custom_plugin, aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls, aws_s3_object, aws_security_group, aws_subnet, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones, aws_iam_policy_document",6,False,"missing_encryption, public_access_not_blocked","AC-6, AC-3, AU-2","Has one ""aws_msk_cluster"" resource
+with one ""number_of_broker_nodes"" = 3
+with one ""logging_info""
+wit"
+scenario_215,"aws_rds_cluster, aws_vpc",3,False,missing_encryption,SC-28,"Has a aws_rds_cluster with engine==""aurora-mysql"""
+scenario_216,"aws_rds_cluster, aws_vpc",3,False,missing_encryption,SC-28,"Has a aws_rds_cluster with engine==""aurora-postgresql"""
+scenario_217,"aws_rds_cluster, aws_vpc",3,False,missing_encryption,SC-28,"Has one ""aws_rds_cluster"" resource
+with one ""allocated_storage"" = 100"
+scenario_218,"aws_rds_cluster, aws_vpc",3,False,missing_encryption,SC-28,"Has one ""aws_rds_cluster"" resource
+with one ""allocated_storage"" = 100
+with one ""availability_zones"" "
+scenario_219,"aws_db_instance, aws_vpc",3,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""engine"" = ""mysql"""
+scenario_220,aws_db_instance,3,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""engine"" = ""postgres"""
+scenario_221,aws_dynamodb_table,3,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+"
+scenario_222,aws_dynamodb_table,3,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+with one ""replica""
+with one ""region_name"" = ""us-east-2""
+with o"
+scenario_223,aws_dynamodb_table,3,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+with one ""point_in_time_recovery""
+with one ""enabled"" = true"
+scenario_224,"aws_dynamodb_global_table, aws_dynamodb_table, aws_dynamodb_table",4,False,missing_encryption,"AC-6, SC-28","Has one ""aws_dynamodb_global_table"" resource
+with one ""replica""
+with one ""region_name"" = ""us-east-1"""
+scenario_225,aws_dynamodb_table,3,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+with one ""read_capacity"" = 10
+with one ""write_capacity"" = 10"
+scenario_226,"aws_dax_cluster, aws_iam_role",3,True,none,AC-6,"has one ""aws_dax_cluster"""
+scenario_227,aws_dax_parameter_group,2,True,none,NONE,"Has one ""aws_dax_parameter_group"""
+scenario_228,"aws_dax_subnet_group, aws_subnet, aws_subnet, aws_vpc",3,True,none,NONE,"Has one ""aws_dax_subnet_group"""
+scenario_229,aws_dynamodb_table,2,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+with one ""point_in_time_recovery"" with ""enabled"" = true"
+scenario_230,aws_dynamodb_table,2,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+with one ""ttl""
+with one ""attribute_name"" = ""custom_ttl_attribu"
+scenario_231,aws_dynamodb_table,2,False,missing_encryption,NONE,"Has one ""aws_dynamodb_table"" resource
+with one ""server_side_encryption""
+with one ""enabled"" = true"
+scenario_232,aws_dynamodb_table,2,False,missing_encryption,SC-28,"Has one ""aws_dynamodb_table"" resource
+with one ""stream_enabled"" = true
+with one ""stream_view_type"" ="
+scenario_233,aws_vpc,1,True,none,NONE,"Has one resource ""aws_vpc""        
+with one ""cidr_block"" with any valid IPv4 address
+with one ""assig"
+scenario_234,"aws_internet_gateway, aws_vpc",2,True,none,NONE,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_internet_gateway""
+with one ""vpc_id"" with value ""aw"
+scenario_235,"aws_egress_only_internet_gateway, aws_vpc",2,True,none,NONE,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_egress_only_internet_gateway""
+with one ""vpc_id"" wi"
+scenario_236,"aws_subnet, aws_subnet, aws_vpc",2,True,none,NONE,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_subnet""
+with one ""vpc_id"" with value ""aws_vpc.{VPC"
+scenario_237,"aws_network_acl, aws_subnet, aws_vpc",3,True,none,NONE,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_subnet""
+with one ""vpc_id"" with value ""aws_vpc.{VPC"
+scenario_238,"aws_vpc, aws_vpc, aws_vpc_peering_connection",2,True,none,NONE,"Has two resources ""aws_vpc""
+
+Has one resource ""aws_vpc_peering_connection""
+with one ""vpc_id"" with va"
+scenario_239,"aws_internet_gateway, aws_route_table, aws_vpc",2,True,none,NONE,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_internet_gateway""
+with one ""vpc_id"" with value ""aw"
+scenario_240,"aws_instance, aws_subnet, aws_vpc, aws_ami",3,True,none,AC-3,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_subnet""
+with one ""vpc_id"" with value ""aws_vpc.{VPC"
+scenario_241,"aws_neptune_cluster, aws_neptune_cluster_parameter_group",2,True,none,AC-6,"Has ""aws_neptune_cluster""
+with ""neptune_cluster_parameter_group_name""
+
+Has ""aws_neptune_cluster_para"
+scenario_242,"aws_neptune_subnet_group, aws_subnet, aws_subnet, aws_vpc",3,True,none,NONE,"Has ""aws_vpc""
+
+Has two ""aws_subnet""
+
+Has ""aws_neptune_subnet_group""
+with subnet_ids = array with bot"
+scenario_243,"aws_neptune_cluster, aws_neptune_cluster_parameter_group, aws_neptune_subnet_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,AC-6,"Has ""aws_vpc""
+
+Has two ""aws_subnet""
+
+Has ""aws_neptune_subnet_group""
+with subnet_ids = array with bot"
+scenario_244,"aws_neptune_cluster, aws_neptune_cluster_instance, aws_neptune_cluster_parameter_group, aws_neptune_parameter_group",3,True,none,"AC-6, AC-3","Has ""aws_neptune_cluster""
+with ""neptune_cluster_parameter_group_name""
+
+Has ""aws_neptune_cluster_para"
+scenario_245,"aws_neptune_cluster, aws_neptune_cluster_instance, aws_neptune_cluster_parameter_group, aws_neptune_parameter_group, aws_neptune_subnet_group, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has ""aws_neptune_cluster""
+with ""neptune_cluster_parameter_group_name""
+with ""neptune_cluster_subnet_g"
+scenario_246,"aws_chime_voice_connector, aws_chime_voice_connector, aws_chime_voice_connector_group",3,True,none,NONE,"Has one resource ""aws_chime_voice_connector""
+with require_encryption=""true""
+
+Has another resource ""a"
+scenario_247,"aws_chime_voice_connector, aws_chime_voice_connector, aws_chime_voice_connector_group",3,True,none,NONE,"Has one resource ""aws_chime_voice_connector""
+with require_encryption=""true""
+
+Has another resource ""a"
+scenario_248,"aws_chime_voice_connector, aws_chime_voice_connector, aws_chime_voice_connector_group",3,True,none,NONE,"Has one resource ""aws_chime_voice_connector""
+with require_encryption=""true""
+
+Has another resource ""a"
+scenario_249,"aws_chime_voice_connector, aws_chime_voice_connector, aws_chime_voice_connector_group",3,True,none,NONE,"Has one resource ""aws_chime_voice_connector""
+with require_encryption=""true""
+
+Has another resource ""a"
+scenario_250,"aws_chime_voice_connector, aws_chime_voice_connector_logging",2,True,none,AU-2,"Has one resource ""aws_chime_voice_connector""
+
+Has one resource ""aws_chime_voice_connector_logging""
+w"
+scenario_251,"aws_chime_voice_connector, aws_chime_voice_connector_logging",2,True,none,AU-2,"Has one resource ""aws_chime_voice_connector""
+
+Has one resource ""aws_chime_voice_connector_logging""
+w"
+scenario_252,"aws_chime_voice_connector, aws_chime_voice_connector_logging",2,True,none,AU-2,"Has one resource ""aws_chime_voice_connector""
+with require_encryption=true
+
+Has one resource ""aws_chi"
+scenario_253,"aws_chime_voice_connector, aws_chime_voice_connector_streaming",2,True,none,NONE,"Has one resource ""aws_chime_voice_connector""
+with require_encryption=true
+
+Has one resource ""aws_chi"
+scenario_254,"aws_chime_voice_connector, aws_chime_voice_connector_streaming",2,True,none,NONE,"Has one resource ""aws_chime_voice_connector""
+
+Has one resource ""aws_chime_voice_connector_streaming"""
+scenario_255,"aws_redshift_cluster, aws_redshift_endpoint_access, aws_redshift_subnet_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,AC-6,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_subnet""
+with one ""vpc_id"" with value ""aws_vpc.{VPC"
+scenario_256,"aws_redshift_cluster, aws_redshift_endpoint_access, aws_redshift_subnet_group, aws_subnet, aws_subnet, aws_vpc",4,True,none,AC-6,"Has one resource ""aws_vpc""
+
+Has one resource ""aws_subnet""
+with one ""vpc_id"" with value ""aws_vpc.{VPC"
+scenario_257,"aws_redshift_cluster, aws_redshift_event_subscription, aws_sns_topic",3,True,none,NONE,"Has one resource ""aws_sns_topic""
+
+Has one resource ""aws_redshift_cluster""
+
+Has one resource ""aws_red"
+scenario_258,"aws_redshift_cluster, aws_redshift_event_subscription, aws_sns_topic",3,True,none,NONE,"Has one resource ""aws_sns_topic""
+
+Has one resource ""aws_redshift_cluster""
+
+Has one resource ""aws_red"
+scenario_259,"aws_redshift_cluster, aws_redshift_event_subscription, aws_redshift_parameter_group, aws_sns_topic",4,True,none,AC-6,"Has one resource ""aws_sns_topic""
+
+Has one resource ""aws_redshift_parameter_group""
+
+Has one resource "
+scenario_260,"aws_redshift_cluster, aws_redshift_event_subscription, aws_redshift_parameter_group, aws_sns_topic",4,True,none,AC-6,"Has one resource ""aws_sns_topic""
+
+Has one resource ""aws_redshift_parameter_group""
+
+Has one resource "
+scenario_261,"aws_iam_group, aws_iam_group_membership, aws_iam_user, aws_iam_user",3,True,none,AC-6,"Has one ""aws_iam_group"" resource
+with one ""name"" with any value
+
+Has one ""aws_iam_user"" resource
+wit"
+scenario_262,"aws_iam_group, aws_iam_group_policy_attachment, aws_iam_policy, aws_iam_policy_document",3,False,wildcard_permission,AC-6,"Has one ""aws_iam_group"" resource
+with one ""name"" with any value
+
+Has one ""aws_iam_policy"" resource
+w"
+scenario_263,"aws_iam_user, aws_iam_user_ssh_key",2,True,none,AC-6,"Has one ""aws_iam_user"" resource
+with one ""name"" with any value
+
+Has one ""aws_iam_user_ssh_key"" resou"
+scenario_264,aws_iam_group,1,True,none,AC-6,"Has one ""aws_iam_group"" resource
+with one ""name"" with any value"
+scenario_265,aws_iam_user,1,True,none,AC-6,"Has one ""aws_iam_user"" resource
+with one ""name"" with any value"
+scenario_266,aws_iam_virtual_mfa_device,1,True,none,AC-6,"Has one ""aws_iam_virtual_mfa_device"" resource
+with one ""virtual_mfa_device_name"" with any string"
+scenario_267,aws_s3_bucket,1,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12",Has an aws_s3_bucket resource
+scenario_268,aws_s3_bucket,1,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12",Has an aws_s3_bucket resource
+scenario_269,"aws_s3_bucket, aws_s3_bucket_accelerate_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_bucket_accelerate_configuration resource
+with bucket = buc"
+scenario_270,"aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_ownership_controls",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_s3_bucket_ownership_controls
+with bucket = bucket id
+and r"
+scenario_271,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_analytics_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_bucket_analytics_configuration resource
+with bucket = buck"
+scenario_272,"aws_s3_bucket, aws_s3_bucket_intelligent_tiering_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_s3_bucket_intelligent_tiering
+with bucket = bucked id OR n"
+scenario_273,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_inventory",3,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has two resources ""aws_s3_bucket""
+
+Has one resource ""aws_s3_bucket_inventory""
+with bucket = first bu"
+scenario_274,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_inventory",3,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has two resources ""aws_s3_bucket""
+
+Has one resource ""aws_s3_bucket_inventory""
+with bucket = first bu"
+scenario_275,"aws_s3_bucket, aws_s3_bucket_metric",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_s3_bucket_metric
+with bucket = bucked id OR name"
+scenario_276,"aws_s3_bucket, aws_s3_bucket_notification, aws_sns_topic",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has one resource ""aws_s3_bucket""
+
+Has one resource ""aws_sns_topic""
+
+Has one resource ""aws_s3_bucket_"
+scenario_277,"aws_s3_bucket, aws_s3_bucket_object",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_s3_object resource
+with bucket = bucket id OR name
+with so"
+scenario_278,"aws_s3_bucket, aws_s3_object",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_s3_object resource
+with bucket = bucket id OR name
+with so"
+scenario_279,"aws_s3_bucket, aws_s3_bucket_object_lock_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+with object_lock_enabled = true
+
+Has an aws_s3_object_lock resource
+wi"
+scenario_280,"aws_s3_bucket, aws_s3_bucket_ownership_controls",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket resource
+
+Has an aws_s3_bucket_ownership_controls
+with bucket = bucket id OR na"
+scenario_281,"aws_kms_key, aws_s3_bucket, aws_s3_bucket_server_side_encryption_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked",AU-12,"Has one resource ""aws_s3_bucket""
+
+Has one resource ""aws_kms_key""
+
+Has one resource ""aws_s3_bucket_se"
+scenario_282,"aws_s3_bucket, aws_s3_bucket_cors_configuration",2,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_cors_configuration"
+scenario_283,"aws_s3_bucket, aws_s3_bucket_cors_configuration",2,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_cors_configuration
+with bucket = bucket id OR name
+with c"
+scenario_284,"aws_s3_bucket, aws_s3_bucket_website_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_website_configuration
+with bucket = bucket id OR name"
+scenario_285,"aws_s3_bucket, aws_s3_bucket_website_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_website_configuration
+with bucket = bucket id OR name
+wit"
+scenario_286,"aws_s3_bucket, aws_s3_bucket_public_access_block",2,False,"missing_encryption, missing_logging","AC-6, AC-3, SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_public_access
+with bucket = bucket id OR name"
+scenario_287,"aws_s3_bucket, aws_s3_bucket_request_payment_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_request_payment_configuration
+with bucket = bucket id OR "
+scenario_288,"aws_s3_bucket, aws_s3_bucket_request_payment_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_request_payment_configuration
+with bucket = bucket id OR "
+scenario_289,"aws_s3_bucket, aws_s3_bucket_request_payment_configuration",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_request_payment_configuration
+with bucket = bucket id OR "
+scenario_290,"aws_s3_bucket, aws_s3_bucket_versioning",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_versioning
+with bucket = bucket id OR name"
+scenario_291,"aws_s3_bucket, aws_s3_bucket_versioning",2,False,"missing_encryption, missing_logging, public_access_not_blocked","SC-28, AU-12","Has an aws_s3_bucket
+
+Has an aws_s3_bucket_versioning
+with bucket = bucket id OR name
+with versionin"
+scenario_292,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_logging",2,False,"missing_encryption, public_access_not_blocked","SC-28, AU-2","Has two aws_s3_bucket
+
+Has an aws_s3_bucket_logging
+with bucket = bucket id OR name
+with target_buck"
+scenario_293,"aws_s3_bucket, aws_s3_bucket, aws_s3_bucket_logging",2,False,"missing_encryption, public_access_not_blocked","SC-28, AU-2","Has two aws_s3_bucket
+
+Has an aws_s3_bucket_logging
+with bucket = bucket id OR name
+with target_buck"
+scenario_294,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_iam_policy_document, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argument block
+    with ""type"" argument"
+scenario_295,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_iam_policy_document, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argum"
+scenario_296,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_iam_policy_document, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argum"
+scenario_297,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_iam_policy_document, aws_iam_policy_document",4,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argum"
+scenario_298,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_security_group, aws_subnet, aws_vpc, aws_iam_policy_document, aws_iam_policy_document",6,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argument block
+    with ""type"" argument"
+scenario_299,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_security_group, aws_subnet, aws_vpc, aws_iam_policy_document, aws_iam_policy_document",6,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argum"
+scenario_300,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_security_group, aws_subnet, aws_vpc, aws_iam_policy_document, aws_iam_policy_document",6,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argum"
+scenario_301,"aws_codebuild_project, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_s3_bucket, aws_security_group, aws_subnet, aws_vpc, aws_iam_policy_document, aws_iam_policy_document",6,False,"missing_encryption, missing_logging, wildcard_permission, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_codebuild_project"" resource
+  with ""artifacts"" argum"
+scenario_302,"aws_api_gateway_method, aws_api_gateway_method, aws_api_gateway_resource, aws_api_gateway_rest_api, aws_s3_bucket",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_api_gateway_rest_api"" resource
+    with ""name"" argument
+have one ""aws_api_gateway_reso"
+scenario_303,"aws_api_gateway_integration, aws_api_gateway_integration, aws_api_gateway_method, aws_api_gateway_method, aws_api_gateway_resource, aws_api_gateway_rest_api, aws_dynamodb_table, aws_iam_role, aws_iam_role, aws_lambda_function, aws_lambda_function, aws_lambda_permission, aws_lambda_permission, aws_s3_bucket",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_api_gateway_rest_api"" resource
+    with ""name"" argument
+have one ""aws_api_gateway_reso"
+scenario_304,"aws_api_gateway_integration, aws_api_gateway_integration, aws_api_gateway_method, aws_api_gateway_method, aws_api_gateway_resource, aws_api_gateway_rest_api, aws_dynamodb_table, aws_iam_role, aws_iam_role, aws_lambda_function, aws_lambda_function, aws_lambda_permission, aws_lambda_permission, aws_s3_bucket",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_api_gateway_rest_api"" resource
+    with ""name"" argument
+have one ""aws_api_gateway_reso"
+scenario_305,"aws_api_gateway_integration, aws_api_gateway_integration, aws_api_gateway_method, aws_api_gateway_method, aws_api_gateway_resource, aws_api_gateway_rest_api, aws_dynamodb_table, aws_iam_role, aws_iam_role, aws_lambda_function, aws_lambda_function, aws_lambda_permission, aws_lambda_permission, aws_s3_bucket, archive_file, archive_file",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_api_gateway_rest_api"" resource
+    with ""name"" argument name
+have one ""aws_api_gateway"
+scenario_306,"aws_backup_plan, aws_backup_selection, aws_backup_vault, aws_iam_role, aws_iam_role_policy_attachment, aws_instance, aws_iam_policy_document",5,True,none,AC-6,"have one ""aws_ami"" data resource
+have one ""aws_instance"" resource
+  with ""ami"" argument linking to t"
+scenario_307,"aws_backup_plan, aws_backup_selection, aws_backup_vault, aws_iam_role, aws_iam_role_policy_attachment, aws_instance, aws_iam_policy_document",5,True,none,AC-6,"have one ""aws_ami"" data resource
+have one ""aws_instance"" resource
+  with ""ami"" argument linking to t"
+scenario_308,"aws_backup_plan, aws_backup_selection, aws_backup_vault, aws_iam_role, aws_iam_role_policy_attachment, aws_instance, aws_iam_policy_document",5,True,none,AC-6,"have one ""aws_ami"" data resource
+have one ""aws_instance"" resource
+  with ""ami"" argument linking to t"
+scenario_309,"aws_backup_plan, aws_backup_selection, aws_backup_vault, aws_iam_role, aws_iam_role_policy_attachment, aws_instance, aws_key_pair, aws_ami, aws_iam_policy_document",5,True,none,"AC-6, AC-3","have one ""aws_ami"" resource
+  with ""filter"" argument block
+    with ""name"" argument
+    with ""values"
+scenario_310,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_iam_role_policy_attachment, aws_lambda_function, aws_lambda_permission, aws_iam_policy_document",5,True,none,"AC-6, AU-2","have one ""aws_cloudwatch_event_rule"" resource
+    with ""schedule_expression"" argument with value ""cr"
+scenario_311,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_iam_role_policy_attachment, aws_lambda_function, aws_lambda_permission, aws_iam_policy_document",5,True,none,"AC-6, AU-2","have one ""aws_cloudwatch_event_rule"" resource
+    with ""schedule_expression"" argument with value ""cr"
+scenario_312,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_iam_role_policy_attachment, aws_lambda_function, aws_lambda_permission, aws_iam_policy_document",5,True,none,"AC-6, AU-2","have one ""aws_cloudwatch_event_rule"" resource
+    with ""schedule_expression"" argument with value ""cr"
+scenario_313,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_iam_role_policy_attachment, aws_lambda_function, aws_lambda_permission, archive_file, aws_iam_policy_document",5,True,none,"AC-6, AU-2","have one ""aws_cloudwatch_event_rule"" resource
+    with ""schedule_expression"" argument with value ""cr"
+scenario_314,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_iam_role_policy_attachment, aws_lambda_function, aws_lambda_permission, archive_file, aws_iam_policy_document",5,True,none,"AC-6, AU-2","have one ""aws_cloudwatch_event_rule"" resource
+    with ""schedule_expression"" argument with value ""cr"
+scenario_315,"aws_cloudwatch_event_rule, aws_cloudwatch_event_target, aws_iam_role, aws_iam_role_policy_attachment, aws_lambda_function, aws_lambda_permission, archive_file, aws_iam_policy_document",5,True,none,"AC-6, AU-2","have one ""aws_cloudwatch_event_rule"" resource
+    with ""schedule_expression"" argument with value ""cr"
+scenario_316,"aws_cloudfront_distribution, aws_cloudfront_origin_access_control, aws_route53_record, aws_route53_zone, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_cloudfront_origin_access_control"" resource
+    with ""name"" argument
+    with ""origin_a"
+scenario_317,"aws_cloudfront_distribution, aws_cloudfront_origin_access_control, aws_route53_record, aws_route53_zone, aws_s3_bucket",5,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_cloudfront_origin_access_control"" resource
+    with ""name"" argument
+    with ""origin_a"
+scenario_318,"aws_cloudfront_distribution, aws_cloudfront_origin_access_control, aws_route53_record, aws_route53_zone, aws_s3_bucket",4,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_cloudfront_origin_access_control"" resource
+    with ""name"" argument
+    with ""origin_a"
+scenario_319,"aws_cloudfront_distribution, aws_cloudfront_origin_access_control, aws_route53_record, aws_route53_record, aws_route53_zone, aws_s3_bucket",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, SC-28, AU-12","have one ""aws_cloudfront_origin_access_control"" resource
+    with ""name"" argument
+    with ""origin_a"
+scenario_320,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_s3_bucket, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_ami",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, AC-3, SC-28, SC-8, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_lb"" resource
+  with ""subnets"" argument linking to aw"
+scenario_321,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_route53_record, aws_route53_zone, aws_s3_bucket, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_ami",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, AC-3, SC-28, SC-8, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_lb"" resource
+  with ""subnets"" argument linking to aw"
+scenario_322,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_route53_record, aws_route53_zone, aws_s3_bucket, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_ami",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, AC-3, SC-28, SC-8, AU-12","have one ""aws_s3_bucket"" resource
+have one ""aws_lb"" resource
+  with ""subnets"" argument linking to aw"
+scenario_323,"aws_instance, aws_key_pair, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_route53_record, aws_route53_record, aws_route53_zone, aws_s3_bucket, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_vpc_security_group_egress_rule, aws_vpc_security_group_ingress_rule, aws_ami",6,False,"missing_encryption, missing_logging, public_access_not_blocked","AC-6, AC-3, SC-28, SC-8, AU-12","have one ""aws_s3_bucket"" resource
+  with ""bucket"" argument with value ""video-content-bucket""
+have on"
+scenario_324,"aws_db_instance, random_id, random_password",3,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_325,"aws_db_instance, random_id, random_password",3,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 20
+    with one ""engine"" = mys"
+scenario_326,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+    with a specified ""cidr_block""
+    with ""enable_dns_hostnames"" set to "
+scenario_327,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+    with a specified ""cidr_block""
+    with ""enable_dns_hostnames"" set to "
+scenario_328,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+    with a specified ""cidr_block""
+    with ""enable_dns_hostnames"" set to "
+scenario_329,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc, aws_availability_zones",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+    with a specified ""cidr_block""
+    with ""enable_dns_hostnames"" set to "
+scenario_330,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_kms_key, aws_security_group, aws_subnet, aws_subnet",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+with one ""allocated_storage"" = 20
+with one ""engine"" = ""postgres""
+"
+scenario_331,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_kms_key, aws_security_group, aws_subnet, aws_subnet",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+with one ""allocated_storage""
+with one ""engine"" and a valid engine"
+scenario_332,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_kms_key, aws_security_group, aws_subnet, aws_subnet",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+with one ""allocated_storage""
+with one ""engine"" = ""postgres""
+with "
+scenario_333,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_kms_key, aws_security_group, aws_subnet, aws_subnet",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+with one ""allocated_storage"" = 200
+with one ""engine"" = ""postgres"""
+scenario_334,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""postgre"
+scenario_335,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 5
+    with one ""engine"" = ""pos"
+scenario_336,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""postgre"
+scenario_337,"aws_db_instance, aws_db_parameter_group, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 500
+    with one ""engine"" = ""p"
+scenario_338,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""mysql""
+"
+scenario_339,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 500
+    with one ""engine"" = ""m"
+scenario_340,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 10
+    with one ""engine"" = ""my"
+scenario_341,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_342,"aws_db_instance, aws_db_subnet_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 20
+    with one ""engine"" = ""po"
+scenario_343,"aws_db_instance, aws_security_group, random_string",4,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""mysql""
+"
+scenario_344,"aws_db_instance, aws_security_group, random_string",4,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 200
+    with one ""engine"" = ""m"
+scenario_345,"aws_db_instance, aws_security_group, random_string",4,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""mysql""
+"
+scenario_346,"aws_db_instance, aws_db_subnet_group, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""postgre"
+scenario_347,"aws_db_instance, aws_db_subnet_group, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""postgre"
+scenario_348,"aws_db_instance, aws_db_subnet_group, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage"" = 5
+    with one ""engine"" = ""pos"
+scenario_349,"aws_db_instance, aws_db_subnet_group, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" = ""postgre"
+scenario_350,aws_db_option_group,3,True,none,AC-6,"Has one ""aws_db_option_group"" resource
+    with one ""engine_name"" = ""sqlserver-ee""
+    with one ""maj"
+scenario_351,aws_db_option_group,3,True,none,AC-6,"Has one ""aws_db_option_group"" resource
+    with one ""engine_name"" = ""sqlserver-ee""
+    with one ""maj"
+scenario_352,aws_db_option_group,3,True,none,AC-6,"Has one ""aws_db_option_group"" resource
+    with one ""engine_name"" = ""sqlserver-ee""
+    with one ""maj"
+scenario_353,"aws_db_proxy, aws_db_subnet_group, aws_iam_role, aws_rds_cluster, aws_secretsmanager_secret, aws_secretsmanager_secret_version, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,False,missing_encryption,"AC-6, AC-3, SC-28","has one ""aws_db_proxy"" resource
+with ""engine_family"" = ""MYSQL""
+with ""require_tls"" = true
+with ""auth_"
+scenario_354,"aws_db_proxy, aws_db_subnet_group, aws_iam_role, aws_rds_cluster, aws_secretsmanager_secret, aws_secretsmanager_secret_version, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,False,missing_encryption,"AC-6, AC-3, SC-28","has one ""aws_db_proxy"" resource
+with ""engine_family"" = ""MYSQL""
+with ""require_tls"" = true
+with ""auth_"
+scenario_355,"aws_db_proxy, aws_db_subnet_group, aws_iam_role, aws_rds_cluster, aws_secretsmanager_secret, aws_secretsmanager_secret_version, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,False,missing_encryption,"AC-6, AC-3, SC-28","has one ""aws_db_proxy"" resource
+with ""engine_family"" = ""MYSQL""
+with ""require_tls"" = true
+with ""auth_"
+scenario_356,"aws_db_proxy, aws_db_subnet_group, aws_iam_role, aws_rds_cluster, aws_secretsmanager_secret, aws_secretsmanager_secret_version, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,False,missing_encryption,"AC-6, AC-3, SC-28","has one ""aws_db_proxy"" resource
+with ""engine_family"" = ""MYSQL""
+with ""require_tls"" = true
+with ""auth_"
+scenario_357,"aws_db_proxy, aws_db_subnet_group, aws_iam_role, aws_rds_cluster, aws_secretsmanager_secret, aws_secretsmanager_secret_version, aws_security_group, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,False,missing_encryption,"AC-6, AC-3, SC-28","has one ""aws_db_proxy"" resource
+with ""engine_family"" = ""MYSQL""
+with ""require_tls"" = true
+with ""auth_"
+scenario_358,aws_lightsail_instance,1,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+    with ""name"" argument
+    with ""availability_zone"" arg"
+scenario_359,aws_lightsail_instance,2,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+    with ""name"" argument
+    with ""availability_zone"" arg"
+scenario_360,aws_lightsail_instance,2,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+with ""name"" argument
+with ""availability_zone"" argument
+wi"
+scenario_361,aws_lightsail_instance,1,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+with ""name"" argument
+with ""availability_zone"" argument
+wi"
+scenario_362,aws_lightsail_instance,1,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+with ""name"" argument
+with ""availability_zone"" argument
+wi"
+scenario_363,"aws_lightsail_instance, aws_lightsail_static_ip, aws_lightsail_static_ip_attachment",2,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+    with ""name"" argument
+    with ""availability_zone"" arg"
+scenario_364,aws_lightsail_instance,1,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+    with ""name"" argument
+    with ""availability_zone"" arg"
+scenario_365,"aws_lightsail_instance, aws_lightsail_key_pair",2,True,none,NONE,"have one ""aws_lightsail_instance"" resource
+    with ""name"" argument
+    with ""availability_zone"" arg"
+scenario_366,aws_lightsail_database,1,True,none,NONE,"have one ""aws_lightsail_database"" resource
+    with relational_database_name argument
+    with maste"
+scenario_367,aws_lightsail_database,1,True,none,NONE,"have one ""aws_lightsail_database"" resource
+    with relational_database_name argument
+    with maste"
+scenario_368,aws_lightsail_database,2,True,none,NONE,"have one ""aws_lightsail_database"" resource
+    with relational_database_name argument
+    with maste"
+scenario_369,aws_lightsail_database,2,True,none,NONE,"""have one """"aws_lightsail_database"""" resource
+    with relational_database_name argument
+    with ma"
+scenario_370,aws_lightsail_database,2,True,none,NONE,"""have one """"aws_lightsail_database"""" resource
+    with relational_database_name argument
+    with ma"
+scenario_371,"aws_lightsail_disk, aws_availability_zones",2,True,none,NONE,"have one aws_lightsail_disk resource
+    with name
+    with size_in_gb
+    with availability_zone"
+scenario_372,"aws_lightsail_disk, aws_lightsail_disk_attachment, aws_lightsail_instance, aws_availability_zones",3,True,none,NONE,"have one aws_lightsail_disk resource
+    with name
+    with size_in_gb
+    with availability_zone
+
+h"
+scenario_373,"aws_lightsail_disk, aws_lightsail_disk_attachment, aws_lightsail_instance, aws_availability_zones",3,True,none,NONE,"have one aws_lightsail_disk resource
+    with name
+    with size_in_gb
+    with availability_zone
+
+h"
+scenario_374,"aws_lightsail_disk, aws_lightsail_disk, aws_lightsail_disk_attachment, aws_lightsail_disk_attachment, aws_lightsail_instance, aws_availability_zones",4,True,none,AC-6,"have multiple aws_lightsail_disk resource
+    with name
+    with size_in_gb
+    with availability_zo"
+scenario_375,"aws_lightsail_bucket, aws_lightsail_bucket_resource_access, aws_lightsail_instance",3,True,none,NONE,"have one aws_lightsail_bucket
+    with name
+    with bundle_id
+
+have one aws_lightsail_bucket_resour"
+scenario_376,aws_lightsail_certificate,1,True,none,NONE,"have one aws_lightsail_certificate
+    with name
+    with domain_name"
+scenario_377,"aws_lightsail_bucket, aws_lightsail_distribution",3,True,none,NONE,"have one aws_lightsail_distribution
+    with name
+    with bundle_id
+    with default_cache_behavior"
+scenario_378,"aws_lightsail_distribution, aws_lightsail_instance, aws_lightsail_static_ip, aws_lightsail_static_ip_attachment, aws_availability_zones",3,True,none,NONE,"have one aws_lightsail_instance
+    with ""name"" argument
+    with ""availability_zone"" argument
+    w"
+scenario_379,aws_glacier_vault,1,True,none,NONE,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute"
+scenario_380,aws_glacier_vault,1,True,none,NONE,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute"
+scenario_381,"aws_dlm_lifecycle_policy, aws_glacier_vault",3,True,none,AC-6,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+
+has one ""aws_dlm_lifecycle_policy"" "
+scenario_382,"aws_glacier_vault, aws_sns_topic, aws_iam_policy_document",3,False,wildcard_permission,AC-6,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+     with ""notification"" attribute
+ "
+scenario_383,"aws_glacier_vault, aws_sns_topic, aws_iam_policy_document",3,False,wildcard_permission,AC-6,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+     with ""notification"" attribute
+ "
+scenario_384,"aws_glacier_vault, aws_iam_policy_document",3,False,wildcard_permission,AC-6,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+     with ""access_policy"" attribute"
+scenario_385,"aws_glacier_vault, aws_glacier_vault_lock, aws_iam_policy_document",3,True,none,AC-6,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+
+implicit:
+has one ""aws_iam_policy_d"
+scenario_386,"aws_glacier_vault, aws_glacier_vault_lock, aws_iam_policy_document",3,True,none,AC-6,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+     with ""access_policy"" attributr
+"
+scenario_387,"aws_glacier_vault, aws_sns_topic",2,True,none,NONE,"has one ""aws_glacier_vault"" resource
+     with ""name"" attribute
+     with notification attribute
+   "
+scenario_388,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_vpc",4,False,missing_logging,"AC-6, SC-8, AU-12","has one ""aws_lb"" resource
+    with load_balancer_type = ""network""
+
+has one ""aws_lb_listener"" resourc"
+scenario_389,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_390,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with name = test-lb-tf
+    with internal = false
+    with security_gro"
+scenario_391,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_392,"aws_eip, aws_eip, aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",6,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_393,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",6,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has at least one ""aws_instance""
+    with either launch_template or (ami and instance_type) argument
+"
+scenario_394,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_395,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_396,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_397,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_398,"aws_cognito_user_pool, aws_cognito_user_pool_client, aws_cognito_user_pool_domain, aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",6,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_399,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_400,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_401,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_402,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_403,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_404,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_405,"aws_instance, aws_lb, aws_lb_listener, aws_lb_target_group, aws_lb_target_group_attachment, aws_subnet, aws_subnet, aws_vpc",5,False,missing_logging,"AC-6, AC-3, SC-8, AU-12","has one ""aws_lb"" resource
+    with one of either ""subnets"" or ""subnet_mapping""
+    with load_balance"
+scenario_406,aws_db_instance,2,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_407,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_408,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""allocated_storage"" minimun value is 20
+with one ""engine"
+scenario_409,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""allocated_storage"" minimun value is 20
+with one ""engine"
+scenario_410,aws_db_instance,2,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""allocated_storage""
+with one ""engine"" with value ""mysql"""
+scenario_411,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""allocated_storage""
+with one ""engine"" with value ""mysql"""
+scenario_412,"aws_db_instance, aws_db_instance",2,True,none,NONE,"Has two ""aws_db_instance"" resources
+
+resource 1:
+with one ""allocated_storage""
+with one ""engine"" and "
+scenario_413,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_414,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_415,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_416,aws_db_instance,2,True,none,AC-6,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_417,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_418,aws_db_instance,1,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_419,"aws_db_instance, aws_kms_key",2,True,none,NONE,"Has one ""aws_db_instance"" resource
+    with one ""allocated_storage""
+    with one ""engine"" and a vali"
+scenario_420,"aws_db_instance, aws_db_snapshot",2,True,none,NONE,"Has one ""aws_db_instance"" resource
+with one ""allocated_storage""
+with one ""engine"" and a valid engine"
+scenario_421,aws_efs_file_system,1,True,none,NONE,"Have one ""aws_efs_file_system"" resource
+    with one tags"
+scenario_422,aws_efs_file_system,1,True,none,AC-6,"Have one ""aws_efs_file_system"" resource"
+scenario_423,"aws_efs_file_system, aws_efs_file_system_policy, aws_iam_policy_document",3,False,wildcard_permission,AC-6,"Have one ""aws_efs_file_system"" resource
+
+Have one ""aws_efs_file_system_policy"" resource
+with one ""fi"
+scenario_424,"aws_efs_backup_policy, aws_efs_file_system",2,True,none,AC-6,"Have one ""aws_efs_file_system"" resource
+
+Have one ""aws_efs_backup_policy"" resource
+with one ""file_sy"
+scenario_425,"aws_efs_file_system, aws_efs_mount_target, aws_subnet, aws_vpc",3,True,none,NONE,"Have one ""aws_efs_file_system"" resource
+
+Have one ""aws_efs_mount_target"" resource
+with one ""file_sys"
+scenario_426,"aws_internet_gateway, aws_route_table, aws_route_table_association, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+with ""enable_dns_hostnames"" set to true
+wit"
+scenario_427,"aws_internet_gateway, aws_route_table, aws_route_table_association, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+
+Has one ""aws_subnet"" resources
+with ""vpc_i"
+scenario_428,"aws_internet_gateway, aws_route_table, aws_route_table_association, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+with ""enable_dns_hostnames"" set to true
+wit"
+scenario_429,"aws_internet_gateway, aws_route_table, aws_route_table_association, aws_subnet, aws_vpc",5,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+with ""enable_dns_hostnames"" set to true
+wit"
+scenario_430,"aws_internet_gateway, aws_route_table, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+with ""enable_dns_support"" and ""enable_dns_h"
+scenario_431,"aws_internet_gateway, aws_route_table, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+with ""enable_dns_support"" and ""enable_dns_h"
+scenario_432,"aws_internet_gateway, aws_route_table, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource
+with a specified ""cidr_block""
+with ""enable_dns_support"" and ""enable_dns_h"
+scenario_433,"aws_internet_gateway, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+with a specified ""cidr_block"" of ""10.0.0.0/16""
+with ""enable_dns_hostname"
+scenario_434,"aws_internet_gateway, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+with a specified ""cidr_block""
+with ""enable_dns_hostnames"" set to true
+
+H"
+scenario_435,"aws_internet_gateway, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+with a specified ""cidr_block"" of ""10.0.0.0/16""
+with ""enable_dns_hostname"
+scenario_436,"aws_internet_gateway, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+with a specified ""cidr_block""
+with ""enable_dns_hostnames"" set to true
+wi"
+scenario_437,"aws_db_subnet_group, aws_internet_gateway, aws_route_table, aws_route_table_association, aws_route_table_association, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource:
+Includes a ""cidr_block"" for network configuration
+
+Has two ""aws_subnet"" "
+scenario_438,"aws_db_subnet_group, aws_internet_gateway, aws_route_table, aws_route_table_association, aws_route_table_association, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource:
+Includes a ""cidr_block"" for network configuration
+
+Has two ""aws_subnet"" "
+scenario_439,"aws_db_subnet_group, aws_internet_gateway, aws_route_table, aws_route_table_association, aws_route_table_association, aws_security_group, aws_subnet, aws_subnet, aws_vpc",6,True,none,"AC-6, AC-3","Has one ""aws_vpc"" resource:
+Includes a ""cidr_block"" for network configuration
+
+Has two ""aws_subnet"" "
+scenario_440,aws_egress_only_internet_gateway,2,True,none,AC-6,"Has one ""aws_egress_only_internet_gateway"" resource:
+Associated with a specified ""aws_vpc"" resource
+"
+scenario_441,aws_egress_only_internet_gateway,1,True,none,AC-6,"Has one ""aws_egress_only_internet_gateway"" resource:
+Associated with a specified ""aws_vpc"" resource
+"
+scenario_442,"aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,AC-6,"Has one ""aws_vpc_dhcp_options"" resource:
+Specifies Google's DNS servers (8.8.8.8 and 8.8.4.4) as the"
+scenario_443,"aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,AC-6,"Has one ""aws_vpc_dhcp_options"" resource:
+Specifies Google's DNS servers
+Tagged with ""permissions"" to"
+scenario_444,"aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,AC-6,"Has one ""aws_vpc_dhcp_options"" resource:
+Specifies Google's DNS servers (8.8.8.8 and 8.8.4.4) as the"
+scenario_445,"aws_vpc, aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+Configured with a ""cidr_block"" of ""192.168.0.0/16""
+Includes associated c"
+scenario_446,"aws_vpc, aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+Configured with a ""cidr_block""
+Includes associated custom DHCP options
+
+"
+scenario_447,"aws_vpc, aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+Configured with a ""cidr_block"" of ""192.168.0.0/16""
+Includes associated c"
+scenario_448,"aws_vpc, aws_vpc_dhcp_options, aws_vpc_dhcp_options_association",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+Configured with a ""cidr_block"" of ""192.168.0.0/16""
+Includes associated c"
+scenario_449,aws_nat_gateway,3,True,none,AC-6,"Has one ""aws_nat_gateway"" resource:
+Associated with a specified ""aws_subnet"" resource for hosting th"
+scenario_450,aws_nat_gateway,3,True,none,AC-6,"Has one ""aws_nat_gateway"" resource:
+Associated with a specified ""aws_subnet"" resource for hosting th"
+scenario_451,aws_nat_gateway,2,True,none,NONE,"Has one ""aws_nat_gateway"" resource:
+Associated with a specified ""aws_subnet"" resource for hosting th"
+scenario_452,"aws_vpc, aws_vpc, aws_vpc_peering_connection",3,True,none,AC-6,"Has two ""aws_vpc"" resources:
+The first VPC is named ""peer"" and is configured with a ""cidr_block"" of "
+scenario_453,"aws_vpc, aws_vpc, aws_vpc_peering_connection",3,True,none,NONE,"Has two ""aws_vpc"" resources:
+The first VPC is named ""peer"" and is configured with a ""cidr_block"" of "
+scenario_454,"aws_vpc, aws_vpc, aws_vpc_peering_connection",3,True,none,AC-6,"Has two ""aws_vpc"" resources:
+The first VPC is named ""peer""
+The second VPC is named ""base""
+
+Has one """
+scenario_455,aws_default_network_acl,3,True,none,NONE,"Has one ""aws_default_network_acl"" resource:
+with unrestricted ingress and egress rules allowing all "
+scenario_456,"aws_network_acl, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+with a specified ""cidr_block"" of ""10.0.0.0/16""
+
+Has one ""aws_network_acl"
+scenario_457,"aws_network_acl, aws_vpc",3,True,none,NONE,"Has one ""aws_vpc"" resource:
+with a specified ""cidr_block"" of ""10.0.0.0/16""
+
+Has one ""aws_network_acl"
