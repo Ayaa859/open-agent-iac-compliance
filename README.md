@@ -39,8 +39,9 @@ python scripts/generate_report.py
 ## Results
 
 - Precision: 97.5%
-- Recall: 87.8%
-- F1 Score: 92.4%
+- Recall: 88.5%
+- F1 Score: 92.8%
+- Accuracy: 91.5%
 
 ## Research Paper
 
