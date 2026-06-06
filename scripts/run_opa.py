@@ -79,6 +79,7 @@ for tf_dir in TF_DIRS:
             with open(tf_path, 'r', encoding='utf-8') as f:
                 raw = hcl2.load(f)
             tf_json = normalize_hcl2(raw)
+            
         except Exception as e:
             print(f"  [SKIP] {tf_file}: {e}")
             continue
