@@ -292,7 +292,7 @@ for r in files_with_violations:
         if rule in ENRICHMENT_LIBRARY:
             cached = ENRICHMENT_LIBRARY[rule]
             enriched_count += 1
-            print(f"  ✅ {r['file']} | {rule} | {nist}")
+            print(f"   {r['file']} | {rule} | {nist}")
         else:
             cached = {
                 "explanation": v.get("message", ""),
@@ -323,7 +323,7 @@ with open("enriched_results.json", "w") as f:
 total = sum(r['violation_count'] for r in enriched_results)
 
 print("-" * 50)
-print(f"✅ Done!")
+print(f" Done!")
 print(f"   Total violations enriched : {enriched_count}")
 print(f"   Total violations          : {total}")
 print(f"   Saved to                  : enriched_results.json")
