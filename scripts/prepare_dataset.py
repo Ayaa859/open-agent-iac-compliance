@@ -93,7 +93,7 @@ with open('dataset_annotations.csv', 'w', newline='', encoding='utf-8') as f:
 compliant_count = sum(1 for a in annotations if a['compliant'])
 non_compliant_count = sum(1 for a in annotations if not a['compliant'])
 
-print(f"✅ Done!")
+print(f" Done!")
 print(f"   Total processed : {len(annotations)}")
 print(f"   Compliant       : {compliant_count}")
 print(f"   Non-compliant   : {non_compliant_count}")
