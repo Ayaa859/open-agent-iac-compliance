@@ -21,18 +21,18 @@ violation contains result if {
     }
 }
 
-# AC-3: Security group with 0.0.0.0/0 and from_port 0
+# AC-3: Any specific port open to 0.0.0.0/0
 violation contains result if {
     resource := input.resource.aws_security_group[name]
     ingress := resource.ingress[_]
     ingress.cidr_blocks[_] == "0.0.0.0/0"
-    ingress.from_port == 0
+    ingress.from_port > 0
     result := {
         "resource": name,
-        "rule": "unrestricted_ingress",
+        "rule": "unrestricted_ingress_specific_port",
         "nist_control": "AC-3",
         "severity": "HIGH",
-        "message": "Security group allows unrestricted inbound traffic from 0.0.0.0/0"
+        "message": "Security group allows unrestricted inbound on a specific port from 0.0.0.0/0"
     }
 }
 
