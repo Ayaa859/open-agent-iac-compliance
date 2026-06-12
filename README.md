@@ -43,6 +43,3 @@ python scripts/generate_report.py
 - F1 Score: 92.8%
 - Accuracy: 91.5%
 
-## Research Paper
-
-See `/paper` for the full IEEE paper.
