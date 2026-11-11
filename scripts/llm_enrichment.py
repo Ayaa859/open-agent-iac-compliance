@@ -4,14 +4,48 @@ import time
 import requests
 
 # Configure Cloudflare Workers AI
-CF_API_TOKEN = os.getenv("CF_API_TOKEN")
-CF_ACCOUNT_ID = os.getenv("CF_ACCOUNT_ID")
+CF_ACCOUNT_ID = os.environ["CF_ACCOUNT_ID"]  
+CF_API_TOKEN = os.environ["CF_API_TOKEN"]
 
 CF_URL = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.3-70b-instruct-fp8-fast"
 
 HEADERS = {
     "Authorization": f"Bearer {CF_API_TOKEN}",
     "Content-Type": "application/json"
+}
+
+# Official NIST SP 800-53 Rev. 5 control names and descriptions,
+# hardcoded from the authoritative catalog so the enrichment layer
+# never has to rely on LLM recall for this factual lookup.
+NIST_CATALOG = {
+    "SC-28": {
+        "control_name": "Protection of Information at Rest",
+        "control_description": "The organization protects the confidentiality and integrity of information at rest."
+    },
+    "SC-8": {
+        "control_name": "Transmission Confidentiality and Integrity",
+        "control_description": "The information system protects the confidentiality and integrity of transmitted information."
+    },
+    "AC-6": {
+        "control_name": "Least Privilege",
+        "control_description": "The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks."
+    },
+    "AC-3": {
+        "control_name": "Access Enforcement",
+        "control_description": "The information system enforces approved authorizations for logical access to information and system resources."
+    },
+    "AU-2": {
+        "control_name": "Event Logging",
+        "control_description": "The organization identifies the types of events that the system is capable of logging."
+    },
+    "AU-9": {
+        "control_name": "Protection of Audit Information",
+        "control_description": "The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion."
+    },
+    "AU-12": {
+        "control_name": "Audit Record Generation",
+        "control_description": "The information system provides audit record generation capability for the auditable events defined by the organization."
+    },
 }
 
 def call_llm(prompt, retries=3):
@@ -121,8 +155,15 @@ Respond ONLY with this JSON object:
     "control_name": "the official NIST SP 800-53 control name",
     "control_description": "one sentence description of what this control requires"
   }},
-  "remediation": "corrected Terraform code snippet that fixes this violation"
+  "remediation": "a complete, corrected Terraform resource block"
 }}
+
+STRICT REQUIREMENTS for the "remediation" field:
+- It must contain ONLY valid HashiCorp Configuration Language (HCL) syntax, exactly as it would appear in a real .tf file.
+- Do NOT include markdown code fences (no ```), backticks, or any explanatory prose or sentences.
+- Do NOT use semicolons to separate arguments; each argument goes on its own line.
+- Write the FULL resource block (resource "type" "name" {{ ... }}), not just the single changed argument or a description of the change.
+- Example of correct format for this field: "resource \\"aws_s3_bucket\\" \\"example\\" {{\\n  bucket = \\"my-bucket\\"\\n}}"
 
 Return only the JSON, no markdown, no extra text."""
 
@@ -131,15 +172,25 @@ Return only the JSON, no markdown, no extra text."""
     parsed = parse_json(raw)
 
     if parsed:
+        # Override the LLM's control_id/control_name/control_description
+        # with the authoritative NIST catalog entry, keyed on the control
+        # identifier already known from the Rego policy library (not LLM-guessed).
+        catalog_entry = NIST_CATALOG.get(nist, {})
+        parsed["nist_mapping"] = {
+            "control_id": nist,
+            "control_name": catalog_entry.get("control_name", parsed.get("nist_mapping", {}).get("control_name", "")),
+            "control_description": catalog_entry.get("control_description", parsed.get("nist_mapping", {}).get("control_description", ""))
+        }
         enrichment_cache[key] = parsed
         print(f"  Done: {rule} | {nist}")
     else:
+        catalog_entry = NIST_CATALOG.get(nist, {})
         enrichment_cache[key] = {
             "explanation": message,
             "nist_mapping": {
                 "control_id": nist,
-                "control_name": "See NIST SP 800-53",
-                "control_description": message
+                "control_name": catalog_entry.get("control_name", "See NIST SP 800-53"),
+                "control_description": catalog_entry.get("control_description", message)
             },
             "remediation": "Review AWS security best practices"
         }
@@ -172,7 +223,7 @@ with open("enriched_results.json", "w") as f:
 
 total_enriched = sum(r['violation_count'] for r in enriched_results)
 successful = sum(1 for v in enrichment_cache.values()
-                 if v.get("nist_mapping", {}).get("control_name") != "See NIST SP 800-53")
+                 if v.get("nist_mapping", {}).get("control_name") not in ("See NIST SP 800-53", ""))
 
 print("-" * 50)
 print(f"Done.")
