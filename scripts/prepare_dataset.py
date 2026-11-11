@@ -1,6 +1,24 @@
 import json
 import os
 import csv
+import re
+
+# Matches the content of each "ingress { ... }" block. This assumes ingress
+# blocks are flat (from_port, to_port, protocol, cidr_blocks, description)
+# with no nested sub-blocks, which holds for the AC-3 patterns this mirrors.
+INGRESS_BLOCK_RE = re.compile(r'ingress\s*\{([^}]*)\}', re.IGNORECASE | re.DOTALL)
+
+def has_unrestricted_ingress(tf_code):
+    """
+    Heuristic counterpart to the unrestricted_ingress_specific_port and
+    unrestricted_ingress_all_protocols Rego rules in ac_access_control.rego.
+    Checks only inside ingress { } blocks so an open egress rule (very common
+    and not a violation) is never mistaken for an open inbound rule.
+    """
+    for block in INGRESS_BLOCK_RE.findall(tf_code):
+        if '0.0.0.0/0' in block:
+            return True
+    return False
 
 # NIST 800-53 control mapping rules based on resource type
 def get_nist_controls(resource, tf_code):
@@ -12,9 +30,15 @@ def get_nist_controls(resource, tf_code):
         controls.append('AC-6')
     if 'public' in code and ('true' in code or 'enabled' in code):
         controls.append('AC-3')
+    if 'security_group' in resource.lower() and has_unrestricted_ingress(tf_code):
+        controls.append('AC-3')
 
     # SC - System & Communications Protection
-    if 'encrypt' not in code and any(x in resource for x in ['s3', 'rds', 'ebs', 'dynamodb']):
+    if 'encrypt' not in code and any(x in resource for x in ['s3', 'rds', 'ebs']):
+        controls.append('SC-28')
+    # DynamoDB defaults to encrypted; only an explicit disable is a violation.
+    if 'dynamodb' in resource and 'server_side_encryption' in code \
+            and ('enabled = false' in code or 'enabled=false' in code):
         controls.append('SC-28')
     if 'ssl' not in code and 'tls' not in code and any(x in resource for x in ['lb', 'alb', 'elb']):
         controls.append('SC-8')
@@ -56,14 +80,26 @@ for i in range(458):
     code_lower = tf_code.lower()
     violations = []
 
-    if 'encrypted' not in code_lower and any(x in resource.lower() for x in ['s3','rds','ebs','dynamodb']):
+    if 'encrypted' not in code_lower and any(x in resource.lower() for x in ['s3','rds','ebs']):
         violations.append('missing_encryption')
+    # DynamoDB is encrypted by default (AWS-owned key) even when the
+    # server_side_encryption block is absent, so absence of the keyword
+    # does NOT indicate non-compliance here. Only an explicit disable does,
+    # matching the dynamodb_encryption_disabled Rego rule.
+    if 'dynamodb' in resource.lower() and 'server_side_encryption' in code_lower \
+            and ('enabled = false' in code_lower or 'enabled=false' in code_lower):
+        violations.append('dynamodb_encryption_disabled')
     if 'logging' not in code_lower and any(x in resource.lower() for x in ['s3','lb','alb','trail']):
         violations.append('missing_logging')
     if any(x in code_lower for x in ['"*"', "'*'", '= "*"']):
         violations.append('wildcard_permission')
     if 'public_access' not in code_lower and 's3' in resource.lower():
         violations.append('public_access_not_blocked')
+    # AC-3: mirrors unrestricted_ingress_specific_port / unrestricted_ingress_all_protocols.
+    # Checked inside ingress { } blocks only, so an open egress rule (common
+    # and not itself a violation) doesn't get mistaken for an open inbound rule.
+    if 'security_group' in resource.lower() and has_unrestricted_ingress(tf_code):
+        violations.append('unrestricted_ingress')
 
     is_compliant = len(violations) == 0
     nist_controls = get_nist_controls(resource, tf_code)
