@@ -1,9 +1,9 @@
 # IaC Compliance Audit Report
 
-**Generated:** June 06, 2026  
-**Framework:** NIST SP 800-53 Rev. 5  
-**Tool:** Open-Agent Framework (OPA + LLM)  
-**Scope:** Terraform Infrastructure Configurations  
+**Generated:** November 08, 2026
+**Framework:** NIST SP 800-53 Rev. 5
+**Tool:** Open-Agent Framework (OPA + LLM)
+**Scope:** Terraform Infrastructure Configurations
 
 ---
 
@@ -11,23 +11,12 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Files Scanned | 478 |
-| Evaluated Relevant Files | 213 |
-| Files with Detected Violations | 119 |
-| Total Violations Found | 144 |
-| HIGH Severity | 115 |
-| MEDIUM Severity | 29 |
+| Total Files Scanned | 128 |
+| Files with Violations | 128 |
+| Total Violations Found | 157 |
+| HIGH Severity | 123 |
+| MEDIUM Severity | 34 |
 | LOW Severity | 0 |
-| True Positives | 116 |
-| False Negatives | 15 |
-| False Positives | 3 |
-| True Negatives | 79 |
-| Precision | 97.5% |
-| Recall | 88.5% |
-| F1 Score | 92.8% |
-| Accuracy | 91.5% |
-
-> Note: The detailed findings below include only configurations where the OPA policy engine detected at least one violation. Evaluation metrics are computed over the full set of 213 relevant labeled Terraform configurations.
 
 ---
 
@@ -36,12 +25,12 @@
 | NIST Control | Count |
 |---|---|
 | SC-28 | 101 |
-| SC-8 | 21 |
+| SC-8 | 23 |
 | AC-6 | 11 |
+| AC-3 | 9 |
+| AU-9 | 6 |
 | AU-2 | 4 |
-| AU-9 | 3 |
 | AU-12 | 3 |
-| AC-3 | 1 |
 
 ---
 
@@ -52,14 +41,19 @@
 | s3_missing_encryption | 96 |
 | lb_not_using_https | 21 |
 | wildcard_iam_policy | 11 |
+| unrestricted_ingress_specific_port | 7 |
+| cloudtrail_validation_field_missing | 3 |
 | cloudtrail_no_log_validation | 3 |
 | s3_logging_disabled | 3 |
 | cloudtrail_not_global | 2 |
 | cloudtrail_logging_disabled | 2 |
 | ebs_missing_encryption | 2 |
-| rds_encryption_disabled | 2 |
+| lb_protocol_missing | 2 |
+| dynamodb_encryption_disabled | 1 |
 | ebs_encryption_disabled | 1 |
+| rds_encryption_disabled | 1 |
 | s3_public_access_not_blocked | 1 |
+| unrestricted_ingress_all_protocols | 1 |
 
 ---
 
@@ -67,10 +61,41 @@
 
 ### File: nc_cloudtrail_misconfigured.tf
 
-**Violations found:** 3  
+**Violations found:** 4
 **Label:** NON_COMPLIANT
 
-#### Violation 1: cloudtrail_not_global
+#### Violation 1: cloudtrail_validation_field_missing
+
+| Field | Value |
+|---|---|
+| Resource | bad_trail |
+| NIST Control | AU-9 |
+| Severity | MEDIUM |
+| Message | CloudTrail does not specify enable_log_file_validation |
+
+**Explanation:**
+This is a security risk because without log file validation, it is difficult to ensure the integrity and authenticity of the logs collected by CloudTrail. An attacker could potentially tamper with or alter log files, making it challenging to detect and respond to security incidents. Enabling log file validation helps to ensure that logs are accurate and trustworthy.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AU-9
+- Control Name: Protection of Audit Information
+- Description: The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion.
+
+**Remediation:**
+```hcl
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = false
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+}
+```
+
+---
+
+#### Violation 2: cloudtrail_not_global
 
 | Field | Value |
 |---|---|
@@ -80,21 +105,26 @@
 | Message | CloudTrail is not logging global service events |
 
 **Explanation:**
-Not logging global service events in CloudTrail poses a security risk as it may allow unauthorized or malicious activities to go undetected, potentially leading to security breaches or compliance issues. Global service events provide visibility into management operations that can impact the security and integrity of cloud resources. Without this logging, it becomes challenging to track and investigate security incidents.
+This is a security risk because it allows unauthorized access to AWS services without being detected, which can lead to security breaches and data theft. Global service events provide visibility into management operations that can impact the security of the AWS account. Without logging these events, it is difficult to detect and respond to potential security incidents.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-2
-- Control Name: Audit Events
-- Description: The information system generates audit records containing information that can be used to reconstruct the following: the security-relevant event, the outcome of the event, the identity of the subject causing the event, and the identity of the object affected by the event.
+- Control Name: Event Logging
+- Description: The organization identifies the types of events that the system is capable of logging.
 
 **Remediation:**
 ```hcl
-terraform { required_version = ">= 0.14.0" } provider "aws" { region = "us-west-2" } resource "aws_cloudtrail" "example" { name                          = "example-trail" s3_bucket_name               = aws_s3_bucket.example.id s3_key_prefix                = "/log" include_global_service_events = true }
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = true
+}
 ```
 
 ---
 
-#### Violation 2: cloudtrail_no_log_validation
+#### Violation 3: cloudtrail_no_log_validation
 
 | Field | Value |
 |---|---|
@@ -104,21 +134,28 @@ terraform { required_version = ">= 0.14.0" } provider "aws" { region = "us-west-
 | Message | CloudTrail log file validation is explicitly disabled |
 
 **Explanation:**
-Disabling CloudTrail log file validation is a security risk because it allows unauthorized modifications to log files, which can be used to cover up malicious activities. This can lead to undetected security breaches and compromised data. By disabling validation, an attacker can tamper with log files without being detected.
+Disabling CloudTrail log file validation is a security risk because it allows unauthorized modifications to log files, which can be used to cover up malicious activities. This can lead to undetected security breaches and compromised data. Enabling log file validation ensures the integrity and authenticity of log data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-9
-- Control Name: Audit and Accountability: Audit Log Receipt, Alert, and Storage Protection
-- Description: The information system protects audit information and audit logs in accordance with organization-defined policies and procedures.
+- Control Name: Protection of Audit Information
+- Description: The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion.
 
 **Remediation:**
 ```hcl
-Enable log file validation by setting `enable_log_file_validation` to `true` in the CloudTrail configuration, for example: `enable_log_file_validation = true`
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = false
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+}
 ```
 
 ---
 
-#### Violation 3: cloudtrail_logging_disabled
+#### Violation 4: cloudtrail_logging_disabled
 
 | Field | Value |
 |---|---|
@@ -128,26 +165,65 @@ Enable log file validation by setting `enable_log_file_validation` to `true` in 
 | Message | CloudTrail logging is explicitly disabled |
 
 **Explanation:**
-Disabling CloudTrail logging poses a significant security risk as it prevents the collection and storage of audit logs, making it challenging to detect and respond to security incidents. Without these logs, it is difficult to track changes to resources, identify potential security threats, and conduct forensic analysis. This lack of visibility can lead to undetected security breaches and non-compliance with regulatory requirements.
+Disabling CloudTrail logging poses a significant security risk as it prevents the collection and storage of audit logs, making it difficult to detect and respond to security incidents. This lack of visibility can allow malicious activities to go undetected, compromising the security and integrity of the cloud environment. By disabling logging, organizations may not be able to investigate security incidents or comply with regulatory requirements.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-2
-- Control Name: Audit Events
-- Description: The organization must generate audit records for all auditable events and provide the capability to generate audit records for all auditable events.
+- Control Name: Event Logging
+- Description: The organization identifies the types of events that the system is capable of logging.
 
 **Remediation:**
 ```hcl
-Enable CloudTrail logging by setting `is_logging` to `true` and configuring the `s3_bucket_name` and `s3_key_prefix` properties, for example: `resource "aws_cloudtrail" "example" { is_logging = true, s3_bucket_name = "example-bucket", s3_key_prefix = "example-prefix" }`
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = true
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+  is_organization_trail         = false
+}
 ```
 
 ---
 
 ### File: nc_cloudtrail_no_logging.tf
 
-**Violations found:** 3  
+**Violations found:** 4
 **Label:** NON_COMPLIANT
 
-#### Violation 1: cloudtrail_not_global
+#### Violation 1: cloudtrail_validation_field_missing
+
+| Field | Value |
+|---|---|
+| Resource | example |
+| NIST Control | AU-9 |
+| Severity | MEDIUM |
+| Message | CloudTrail does not specify enable_log_file_validation |
+
+**Explanation:**
+This is a security risk because without log file validation, it is difficult to ensure the integrity and authenticity of the logs collected by CloudTrail. An attacker could potentially tamper with or alter log files, making it challenging to detect and respond to security incidents. Enabling log file validation helps to ensure that logs are accurate and trustworthy.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AU-9
+- Control Name: Protection of Audit Information
+- Description: The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion.
+
+**Remediation:**
+```hcl
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = false
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+}
+```
+
+---
+
+#### Violation 2: cloudtrail_not_global
 
 | Field | Value |
 |---|---|
@@ -157,16 +233,120 @@ Enable CloudTrail logging by setting `is_logging` to `true` and configuring the 
 | Message | CloudTrail is not logging global service events |
 
 **Explanation:**
-Not logging global service events in CloudTrail poses a security risk as it may allow unauthorized or malicious activities to go undetected, potentially leading to security breaches or compliance issues. Global service events provide visibility into management operations that can impact the security and integrity of cloud resources. Without this logging, it becomes challenging to track and investigate security incidents.
+This is a security risk because it allows unauthorized access to AWS services without being detected, which can lead to security breaches and data theft. Global service events provide visibility into management operations that can impact the security of the AWS account. Without logging these events, it is difficult to detect and respond to potential security incidents.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-2
-- Control Name: Audit Events
-- Description: The information system generates audit records containing information that can be used to reconstruct the following: the security-relevant event, the outcome of the event, the identity of the subject causing the event, and the identity of the object affected by the event.
+- Control Name: Event Logging
+- Description: The organization identifies the types of events that the system is capable of logging.
 
 **Remediation:**
 ```hcl
-terraform { required_version = ">= 0.14.0" } provider "aws" { region = "us-west-2" } resource "aws_cloudtrail" "example" { name                          = "example-trail" s3_bucket_name               = aws_s3_bucket.example.id s3_key_prefix                = "/log" include_global_service_events = true }
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = true
+}
+```
+
+---
+
+#### Violation 3: cloudtrail_no_log_validation
+
+| Field | Value |
+|---|---|
+| Resource | example |
+| NIST Control | AU-9 |
+| Severity | MEDIUM |
+| Message | CloudTrail log file validation is explicitly disabled |
+
+**Explanation:**
+Disabling CloudTrail log file validation is a security risk because it allows unauthorized modifications to log files, which can be used to cover up malicious activities. This can lead to undetected security breaches and compromised data. Enabling log file validation ensures the integrity and authenticity of log data.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AU-9
+- Control Name: Protection of Audit Information
+- Description: The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion.
+
+**Remediation:**
+```hcl
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = false
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+}
+```
+
+---
+
+#### Violation 4: cloudtrail_logging_disabled
+
+| Field | Value |
+|---|---|
+| Resource | example |
+| NIST Control | AU-2 |
+| Severity | HIGH |
+| Message | CloudTrail logging is explicitly disabled |
+
+**Explanation:**
+Disabling CloudTrail logging poses a significant security risk as it prevents the collection and storage of audit logs, making it difficult to detect and respond to security incidents. This lack of visibility can allow malicious activities to go undetected, compromising the security and integrity of the cloud environment. By disabling logging, organizations may not be able to investigate security incidents or comply with regulatory requirements.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AU-2
+- Control Name: Event Logging
+- Description: The organization identifies the types of events that the system is capable of logging.
+
+**Remediation:**
+```hcl
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = true
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+  is_organization_trail         = false
+}
+```
+
+---
+
+### File: nc_cloudtrail_no_validation.tf
+
+**Violations found:** 2
+**Label:** NON_COMPLIANT
+
+#### Violation 1: cloudtrail_validation_field_missing
+
+| Field | Value |
+|---|---|
+| Resource | example |
+| NIST Control | AU-9 |
+| Severity | MEDIUM |
+| Message | CloudTrail does not specify enable_log_file_validation |
+
+**Explanation:**
+This is a security risk because without log file validation, it is difficult to ensure the integrity and authenticity of the logs collected by CloudTrail. An attacker could potentially tamper with or alter log files, making it challenging to detect and respond to security incidents. Enabling log file validation helps to ensure that logs are accurate and trustworthy.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AU-9
+- Control Name: Protection of Audit Information
+- Description: The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion.
+
+**Remediation:**
+```hcl
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = false
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+}
 ```
 
 ---
@@ -181,76 +361,70 @@ terraform { required_version = ">= 0.14.0" } provider "aws" { region = "us-west-
 | Message | CloudTrail log file validation is explicitly disabled |
 
 **Explanation:**
-Disabling CloudTrail log file validation is a security risk because it allows unauthorized modifications to log files, which can be used to cover up malicious activities. This can lead to undetected security breaches and compromised data. By disabling validation, an attacker can tamper with log files without being detected.
+Disabling CloudTrail log file validation is a security risk because it allows unauthorized modifications to log files, which can be used to cover up malicious activities. This can lead to undetected security breaches and compromised data. Enabling log file validation ensures the integrity and authenticity of log data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-9
-- Control Name: Audit and Accountability: Audit Log Receipt, Alert, and Storage Protection
-- Description: The information system protects audit information and audit logs in accordance with organization-defined policies and procedures.
+- Control Name: Protection of Audit Information
+- Description: The information system protects audit information and audit logging tools from unauthorized access, modification, and deletion.
 
 **Remediation:**
 ```hcl
-Enable log file validation by setting `enable_log_file_validation` to `true` in the CloudTrail configuration, for example: `enable_log_file_validation = true`
+resource "aws_cloudtrail" "example" {
+  name                          = "example-trail"
+  s3_bucket_name                = "example-bucket"
+  s3_key_prefix                 = "prefix"
+  include_global_service_events = false
+  is_multi_region_trail         = true
+  enable_log_file_validation    = true
+}
 ```
 
 ---
 
-#### Violation 3: cloudtrail_logging_disabled
+### File: nc_dynamodb_no_encryption.tf
 
-| Field | Value |
-|---|---|
-| Resource | example |
-| NIST Control | AU-2 |
-| Severity | HIGH |
-| Message | CloudTrail logging is explicitly disabled |
-
-**Explanation:**
-Disabling CloudTrail logging poses a significant security risk as it prevents the collection and storage of audit logs, making it challenging to detect and respond to security incidents. Without these logs, it is difficult to track changes to resources, identify potential security threats, and conduct forensic analysis. This lack of visibility can lead to undetected security breaches and non-compliance with regulatory requirements.
-
-**NIST SP 800-53 Mapping:**
-- Control ID: AU-2
-- Control Name: Audit Events
-- Description: The organization must generate audit records for all auditable events and provide the capability to generate audit records for all auditable events.
-
-**Remediation:**
-```hcl
-Enable CloudTrail logging by setting `is_logging` to `true` and configuring the `s3_bucket_name` and `s3_key_prefix` properties, for example: `resource "aws_cloudtrail" "example" { is_logging = true, s3_bucket_name = "example-bucket", s3_key_prefix = "example-prefix" }`
-```
-
----
-
-### File: nc_cloudtrail_no_validation.tf
-
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
-#### Violation 1: cloudtrail_no_log_validation
+#### Violation 1: dynamodb_encryption_disabled
 
 | Field | Value |
 |---|---|
 | Resource | example |
-| NIST Control | AU-9 |
-| Severity | MEDIUM |
-| Message | CloudTrail log file validation is explicitly disabled |
+| NIST Control | SC-28 |
+| Severity | HIGH |
+| Message | DynamoDB table has server-side encryption explicitly disabled |
 
 **Explanation:**
-Disabling CloudTrail log file validation is a security risk because it allows unauthorized modifications to log files, which can be used to cover up malicious activities. This can lead to undetected security breaches and compromised data. By disabling validation, an attacker can tamper with log files without being detected.
+This is a security risk because server-side encryption is a critical security control that protects data at rest from unauthorized access. Without encryption, sensitive data stored in the DynamoDB table is vulnerable to exploitation by malicious actors. Enabling server-side encryption ensures that data is encrypted and protected from unauthorized access.
 
 **NIST SP 800-53 Mapping:**
-- Control ID: AU-9
-- Control Name: Audit and Accountability: Audit Log Receipt, Alert, and Storage Protection
-- Description: The information system protects audit information and audit logs in accordance with organization-defined policies and procedures.
+- Control ID: SC-28
+- Control Name: Protection of Information at Rest
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-Enable log file validation by setting `enable_log_file_validation` to `true` in the CloudTrail configuration, for example: `enable_log_file_validation = true`
+resource "aws_dynamodb_table" "example" {
+  name           = "example-table"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "id"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+  server_side_encryption {
+    enabled = true
+  }
+}
 ```
 
 ---
 
 ### File: nc_ebs_no_encryption.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: ebs_missing_encryption
@@ -263,16 +437,21 @@ Enable log file validation by setting `enable_log_file_validation` to `true` in 
 | Message | EBS volume does not specify encryption |
 
 **Explanation:**
-This is a security risk because unencrypted EBS volumes can expose sensitive data to unauthorized access, potentially leading to data breaches or other security incidents. Encryption is essential to protect data at rest, and omitting it can compromise the confidentiality and integrity of the data. By not specifying encryption, the EBS volume is vulnerable to unauthorized access.
+This is a security risk because unencrypted EBS volumes can expose sensitive data to unauthorized access, potentially leading to data breaches or other security incidents. Encryption is essential to protect data at rest, and omitting it can have severe consequences. By not specifying encryption, the EBS volume is vulnerable to data exposure.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest through the use of cryptographic mechanisms to prevent unauthorized disclosure and modification.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-Add the `encrypted` attribute to the EBS volume resource and set it to `true`, for example: `resource "aws_ebs_volume" "example" { encrypted = true }`
+resource "aws_ebs_volume" "example" {
+  availability_zone = "us-west-2a"
+  size              = 40
+  encrypted         = true
+  kms_key_id        = "arn:aws:kms:us-west-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+}
 ```
 
 ---
@@ -287,23 +466,28 @@ Add the `encrypted` attribute to the EBS volume resource and set it to `true`, f
 | Message | EBS volume has encryption explicitly disabled |
 
 **Explanation:**
-This is a security risk because unencrypted EBS volumes can expose sensitive data to unauthorized access, potentially leading to data breaches or other security incidents. Encryption is essential to protect data at rest, and disabling it intentionally or unintentionally can have severe consequences. By encrypting EBS volumes, organizations can ensure the confidentiality and integrity of their data.
+This is a security risk because unencrypted EBS volumes can expose sensitive data to unauthorized access, potentially leading to data breaches or other security incidents. Encryption is a critical security control that protects data at rest. By enabling encryption, organizations can ensure the confidentiality and integrity of their data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-Add the 'encrypted' argument to the 'aws_ebs_volume' resource and set it to 'true', for example: 'resource "aws_ebs_volume" "example" { encrypted = true }'
+resource "aws_ebs_volume" "example" {
+  availability_zone = "us-west-2a"
+  size              = 30
+  encrypted         = true
+  type              = "gp3"
+}
 ```
 
 ---
 
 ### File: nc_ebs_no_field.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: ebs_missing_encryption
@@ -316,23 +500,28 @@ Add the 'encrypted' argument to the 'aws_ebs_volume' resource and set it to 'tru
 | Message | EBS volume does not specify encryption |
 
 **Explanation:**
-This is a security risk because unencrypted EBS volumes can expose sensitive data to unauthorized access, potentially leading to data breaches or other security incidents. Encryption is essential to protect data at rest, and omitting it can compromise the confidentiality and integrity of the data. By not specifying encryption, the EBS volume is vulnerable to unauthorized access.
+This is a security risk because unencrypted EBS volumes can expose sensitive data to unauthorized access, potentially leading to data breaches or other security incidents. Encryption is essential to protect data at rest, and omitting it can have severe consequences. By not specifying encryption, the EBS volume is vulnerable to data exposure.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest through the use of cryptographic mechanisms to prevent unauthorized disclosure and modification.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-Add the `encrypted` attribute to the EBS volume resource and set it to `true`, for example: `resource "aws_ebs_volume" "example" { encrypted = true }`
+resource "aws_ebs_volume" "example" {
+  availability_zone = "us-west-2a"
+  size              = 40
+  encrypted         = true
+  kms_key_id        = "arn:aws:kms:us-west-2:123456789012:key/12345678-1234-1234-1234-123456789012"
+}
 ```
 
 ---
 
 ### File: nc_iam_wildcard.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -345,23 +534,39 @@ Add the `encrypted` attribute to the EBS volume resource and set it to `true`, f
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
 
 ### File: nc_lb_no_https.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -374,23 +579,29 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: nc_rds_no_encryption.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: rds_encryption_disabled
@@ -403,52 +614,35 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | RDS instance has storage encryption explicitly disabled |
 
 **Explanation:**
-This is a security risk because unencrypted RDS instances can expose sensitive data to unauthorized access, potentially leading to data breaches and compliance issues. Encryption is essential to protect data at rest, and disabling it intentionally or unintentionally can have severe consequences. By not encrypting the RDS instance, the organization is vulnerable to data theft and tampering.
+This is a security risk because it allows unauthorized access to sensitive data stored in the RDS instance. Without encryption, an attacker who gains access to the instance can easily read and exploit the data. This violates the principle of protecting sensitive information at rest.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization must protect the confidentiality and integrity of information at rest, which includes encrypting sensitive data stored in databases.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-storage_encrypted = true
-```
-
----
-
-### File: nc_rds_no_encryption_2.tf
-
-**Violations found:** 1  
-**Label:** NON_COMPLIANT
-
-#### Violation 1: rds_encryption_disabled
-
-| Field | Value |
-|---|---|
-| Resource | example |
-| NIST Control | SC-28 |
-| Severity | HIGH |
-| Message | RDS instance has storage encryption explicitly disabled |
-
-**Explanation:**
-This is a security risk because unencrypted RDS instances can expose sensitive data to unauthorized access, potentially leading to data breaches and compliance issues. Encryption is essential to protect data at rest, and disabling it intentionally or unintentionally can have severe consequences. By not encrypting the RDS instance, the organization is vulnerable to data theft and tampering.
-
-**NIST SP 800-53 Mapping:**
-- Control ID: SC-28
-- Control Name: Protection of Information at Rest
-- Description: The organization must protect the confidentiality and integrity of information at rest, which includes encrypting sensitive data stored in databases.
-
-**Remediation:**
-```hcl
-storage_encrypted = true
+resource "aws_db_instance" "example" {
+  allocated_storage    = 20
+  engine               = "postgres"
+  engine_version       = "13.4"
+  instance_class       = "db.t2.micro"
+  name                 = "mydb"
+  username             = "myuser"
+  password             = "mypassword"
+  parameter_group_name = "default.postgres13"
+  skip_final_snapshot  = true
+  storage_encrypted    = true
+  vpc_security_group_ids = ["sg-12345678"]
+}
 ```
 
 ---
 
 ### File: nc_s3_no_encryption.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -461,16 +655,25 @@ storage_encrypted = true
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -485,23 +688,33 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have access logging enabled |
 
 **Explanation:**
-Disabling access logging for an S3 bucket poses a security risk as it makes it difficult to track and monitor access to sensitive data, making it challenging to detect and respond to potential security incidents. Without logging, it is hard to determine who accessed the data, when, and from where. This lack of visibility can lead to undetected data breaches and unauthorized access.
+This is a security risk because without access logging enabled, it is difficult to track and monitor access to the S3 bucket, making it challenging to detect and respond to potential security incidents. This lack of visibility can lead to undetected data breaches or unauthorized access. Enabling access logging is essential for maintaining the security and integrity of the data stored in the S3 bucket.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-12
-- Control Name: Audit Generation
-- Description: The information system generates audit records to the extent needed to enable the auditing of events that have a security relevance.
+- Control Name: Audit Record Generation
+- Description: The information system provides audit record generation capability for the auditable events defined by the organization.
 
 **Remediation:**
 ```hcl
-Add the following Terraform code snippet to enable access logging for the S3 bucket: `logging { target_bucket = "your-target-bucket-name" target_prefix = "your-target-prefix/" }`
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  acl    = "private"
+  versioning {
+    enabled = true
+  }
+  logging {
+    target_bucket = "my-log-bucket"
+    target_prefix = "logs/"
+  }
+}
 ```
 
 ---
 
 ### File: nc_s3_no_logging.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -514,16 +727,25 @@ Add the following Terraform code snippet to enable access logging for the S3 buc
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -538,23 +760,33 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have access logging enabled |
 
 **Explanation:**
-Disabling access logging for an S3 bucket poses a security risk as it makes it difficult to track and monitor access to sensitive data, making it challenging to detect and respond to potential security incidents. Without logging, it is hard to determine who accessed the data, when, and from where. This lack of visibility can lead to undetected data breaches and unauthorized access.
+This is a security risk because without access logging enabled, it is difficult to track and monitor access to the S3 bucket, making it challenging to detect and respond to potential security incidents. This lack of visibility can lead to undetected data breaches or unauthorized access. Enabling access logging is essential for maintaining the security and integrity of the data stored in the S3 bucket.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-12
-- Control Name: Audit Generation
-- Description: The information system generates audit records to the extent needed to enable the auditing of events that have a security relevance.
+- Control Name: Audit Record Generation
+- Description: The information system provides audit record generation capability for the auditable events defined by the organization.
 
 **Remediation:**
 ```hcl
-Add the following Terraform code snippet to enable access logging for the S3 bucket: `logging { target_bucket = "your-target-bucket-name" target_prefix = "your-target-prefix/" }`
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  acl    = "private"
+  versioning {
+    enabled = true
+  }
+  logging {
+    target_bucket = "my-log-bucket"
+    target_prefix = "logs/"
+  }
+}
 ```
 
 ---
 
 ### File: nc_s3_public_access.tf
 
-**Violations found:** 3  
+**Violations found:** 3
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -567,16 +799,25 @@ Add the following Terraform code snippet to enable access logging for the S3 buc
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -591,16 +832,26 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have access logging enabled |
 
 **Explanation:**
-Disabling access logging for an S3 bucket poses a security risk as it makes it difficult to track and monitor access to sensitive data, making it challenging to detect and respond to potential security incidents. Without logging, it is hard to determine who accessed the data, when, and from where. This lack of visibility can lead to undetected data breaches and unauthorized access.
+This is a security risk because without access logging enabled, it is difficult to track and monitor access to the S3 bucket, making it challenging to detect and respond to potential security incidents. This lack of visibility can lead to undetected data breaches or unauthorized access. Enabling access logging is essential for maintaining the security and integrity of the data stored in the S3 bucket.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AU-12
-- Control Name: Audit Generation
-- Description: The information system generates audit records to the extent needed to enable the auditing of events that have a security relevance.
+- Control Name: Audit Record Generation
+- Description: The information system provides audit record generation capability for the auditable events defined by the organization.
 
 **Remediation:**
 ```hcl
-Add the following Terraform code snippet to enable access logging for the S3 bucket: `logging { target_bucket = "your-target-bucket-name" target_prefix = "your-target-prefix/" }`
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  acl    = "private"
+  versioning {
+    enabled = true
+  }
+  logging {
+    target_bucket = "my-log-bucket"
+    target_prefix = "logs/"
+  }
+}
 ```
 
 ---
@@ -615,23 +866,80 @@ Add the following Terraform code snippet to enable access logging for the S3 buc
 | Message | S3 bucket has public-read ACL without public access block |
 
 **Explanation:**
-This is a security risk because an S3 bucket with public-read ACL and without public access block allows anyone on the internet to access the bucket's contents, potentially exposing sensitive data. This could lead to unauthorized data breaches or other malicious activities. By not blocking public access, the bucket's data is vulnerable to unauthorized access.
+This is a security risk because it allows unauthorized access to sensitive data stored in the S3 bucket. Anyone with the bucket's URL can read the data, potentially leading to data breaches or leaks. This violates the principle of least privilege and can have severe consequences.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-3
-- Control Name: Access Control for Remote Access Sessions
-- Description: This control requires that access to system resources be controlled based on user identity, authentication, and authorization.
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket_public_access_block.example: { bucket = aws_s3_bucket.example.id, block_public_acls   = true, block_public_policy = true, ignore_public_acls  = true, restrict_public_buckets = true }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  acl = "private"
+  versioning {
+    enabled = true
+  }
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+  public_access_block {
+    block_public_acls = true
+    block_public_policy = true
+    ignore_public_acls = true
+    restrict_public_buckets = true
+  }
+}
+```
+
+---
+
+### File: nc_sg_ssh_open.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_all_protocols
+
+| Field | Value |
+|---|---|
+| Resource | ssh_open |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows all protocol traffic from 0.0.0.0/0 |
+
+**Explanation:**
+Allowing all protocol traffic from any IP address is a significant security risk because it exposes the resource to potential attacks from any source on the internet. This could lead to unauthorized access, data breaches, or other malicious activities. It is essential to restrict ingress traffic to only necessary protocols and sources.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
 ```
 
 ---
 
 ### File: scenario_009.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -644,23 +952,32 @@ aws_s3_bucket_public_access_block.example: { bucket = aws_s3_bucket.example.id, 
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_010.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -673,23 +990,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_011.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -702,23 +1028,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_036.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -731,23 +1066,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_037.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -760,23 +1104,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_039.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -789,16 +1142,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -813,23 +1175,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_040.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -842,23 +1213,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_041.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -871,16 +1251,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -895,23 +1284,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_059.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -924,23 +1322,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_060.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -953,23 +1360,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_061.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -982,23 +1398,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_062.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1011,23 +1436,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_063.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1040,23 +1474,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_064.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1069,23 +1512,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_065.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1098,23 +1550,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_066.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1127,23 +1588,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_067.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -1156,16 +1626,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
@@ -1180,23 +1666,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_070.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1209,23 +1704,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_074.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -1238,23 +1742,39 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
 
 ### File: scenario_075.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -1267,23 +1787,39 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
 
 ### File: scenario_076.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -1296,23 +1832,39 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
 
 ### File: scenario_077.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -1325,23 +1877,39 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
 
 ### File: scenario_104.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1354,23 +1922,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_107.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1383,23 +1960,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_109.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1412,23 +1998,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_110.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1441,23 +2036,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_111.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1470,23 +2074,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_112.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1499,23 +2112,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_113.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1528,23 +2150,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_114.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1557,23 +2188,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_115.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1586,16 +2226,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -1610,23 +2259,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_116.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1639,23 +2297,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_117.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1668,23 +2335,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_118.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1697,23 +2373,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_120.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1726,23 +2411,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_121.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1755,16 +2449,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -1779,23 +2482,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_123.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1808,52 +2520,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
-```
-
----
-
-### File: scenario_153.tf
-
-**Violations found:** 1  
-**Label:** NON_COMPLIANT
-
-#### Violation 1: wildcard_iam_policy
-
-| Field | Value |
-|---|---|
-| Resource | dynamodb_lambda_policy |
-| NIST Control | AC-6 |
-| Severity | HIGH |
-| Message | IAM policy uses wildcard (*) permissions, violating least privilege |
-
-**Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
-
-**NIST SP 800-53 Mapping:**
-- Control ID: AC-6
-- Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
-
-**Remediation:**
-```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_204.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1866,23 +2558,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_205.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1895,23 +2596,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_212.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1924,23 +2634,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_213.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1953,23 +2672,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_214.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -1982,16 +2710,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -2006,23 +2743,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_267.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2035,23 +2781,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_268.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2064,23 +2819,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_269.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2093,23 +2857,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_270.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2122,23 +2895,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_271.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2151,16 +2933,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -2175,23 +2966,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_272.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2204,23 +3004,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_273.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2233,16 +3042,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -2257,23 +3075,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_274.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2286,16 +3113,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -2310,23 +3146,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_275.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2339,23 +3184,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_276.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2368,23 +3222,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_278.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2397,23 +3260,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_279.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2426,23 +3298,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_280.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2455,23 +3336,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_282.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2484,23 +3374,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_283.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2513,23 +3412,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_284.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2542,23 +3450,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_285.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2571,23 +3488,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_286.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2600,23 +3526,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_287.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2629,23 +3564,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_288.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2658,23 +3602,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_289.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2687,23 +3640,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_290.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2716,23 +3678,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_291.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2745,23 +3716,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_292.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2774,16 +3754,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -2798,23 +3787,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_293.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2827,16 +3825,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -2851,23 +3858,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_294.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2880,23 +3896,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_295.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2909,23 +3934,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_296.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2938,23 +3972,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_297.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2967,23 +4010,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_298.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -2996,23 +4048,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_299.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3025,23 +4086,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_300.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3054,23 +4124,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_301.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3083,23 +4162,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_302.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -3112,16 +4200,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
@@ -3136,23 +4240,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_303.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -3165,16 +4278,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
@@ -3189,23 +4318,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_304.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -3218,16 +4356,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
@@ -3242,23 +4396,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_305.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
 #### Violation 1: wildcard_iam_policy
@@ -3271,16 +4434,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | IAM policy uses wildcard (*) permissions, violating least privilege |
 
 **Explanation:**
-Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, potentially allowing unauthorized actions. This violates the principle of least privilege, which requires that users and services have only the necessary permissions to perform their tasks. As a result, an attacker who gains access to an account with wildcard permissions could exploit these broad permissions to cause harm.
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: AC-6
 - Control Name: Least Privilege
-- Description: The organization must ensure that all users and services are granted only the necessary privileges to perform their assigned tasks.
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
 
 **Remediation:**
 ```hcl
-Replace the wildcard (*) with explicit permissions, for example: `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "*" } ] }) }` becomes `resource "aws_iam_policy" "example" { policy = jsonencode({ Version = "2012-10-17", Statement = [ { Effect = "Allow", Action = [ "ec2:DescribeInstances", "ec2:DescribeImages" ], Resource = "arn:aws:ec2:region:account-id:instance/*" } ] }) }`
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
@@ -3295,23 +4474,32 @@ Replace the wildcard (*) with explicit permissions, for example: `resource "aws_
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_316.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3324,23 +4512,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_317.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3353,23 +4550,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_318.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3382,23 +4588,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_319.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -3411,23 +4626,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_320.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3440,23 +4664,29 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_321.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3469,23 +4699,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_322.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3498,23 +4734,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_323.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3527,23 +4769,178 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
+```
+
+---
+
+### File: scenario_343.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | main |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+```
+
+---
+
+### File: scenario_344.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | main |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+```
+
+---
+
+### File: scenario_345.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | main |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+```
+
+---
+
+### File: scenario_388.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: lb_protocol_missing
+
+| Field | Value |
+|---|---|
+| Resource | my_listener |
+| NIST Control | SC-8 |
+| Severity | MEDIUM |
+| Message | Load balancer listener does not specify a protocol |
+
+**Explanation:**
+Not specifying a protocol for a load balancer listener is a security risk because it can lead to unintended exposure of services to unauthorized access, potentially allowing attackers to exploit vulnerabilities in unsupported protocols. This lack of specificity can also make it difficult to enforce security policies and monitor traffic. By not defining a protocol, the load balancer may default to a protocol that is not intended, increasing the attack surface.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: SC-8
+- Control Name: Transmission Confidentiality and Integrity
+- Description: The information system protects the confidentiality and integrity of transmitted information.
+
+**Remediation:**
+```hcl
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port = 443
+  protocol = "HTTPS"
+  ssl_policy = "ELBSecurityPolicy-2016-08"
+  certificate_arn = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_389.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3556,26 +4953,65 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_390.tf
 
-**Violations found:** 1  
+**Violations found:** 2
 **Label:** NON_COMPLIANT
 
-#### Violation 1: lb_not_using_https
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | web-server |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+```
+
+---
+
+#### Violation 2: lb_not_using_https
 
 | Field | Value |
 |---|---|
@@ -3585,23 +5021,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_391.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3614,23 +5056,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_392.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3643,23 +5091,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_393.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3672,23 +5126,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_394.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3701,23 +5161,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_395.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3730,23 +5196,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_396.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3759,23 +5231,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_397.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3788,23 +5266,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_398.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3817,23 +5301,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_399.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3846,23 +5336,64 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
+```
+
+---
+
+### File: scenario_400.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: lb_protocol_missing
+
+| Field | Value |
+|---|---|
+| Resource | my_listener |
+| NIST Control | SC-8 |
+| Severity | MEDIUM |
+| Message | Load balancer listener does not specify a protocol |
+
+**Explanation:**
+Not specifying a protocol for a load balancer listener is a security risk because it can lead to unintended exposure of services to unauthorized access, potentially allowing attackers to exploit vulnerabilities in unsupported protocols. This lack of specificity can also make it difficult to enforce security policies and monitor traffic. By not defining a protocol, the load balancer may default to a protocol that is not intended, increasing the attack surface.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: SC-8
+- Control Name: Transmission Confidentiality and Integrity
+- Description: The information system protects the confidentiality and integrity of transmitted information.
+
+**Remediation:**
+```hcl
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port = 443
+  protocol = "HTTPS"
+  ssl_policy = "ELBSecurityPolicy-2016-08"
+  certificate_arn = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_401.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3875,23 +5406,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_402.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3904,23 +5441,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_403.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3933,23 +5476,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_404.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3962,23 +5511,29 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
 ```
 
 ---
 
 ### File: scenario_405.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** NON_COMPLIANT
 
 #### Violation 1: lb_not_using_https
@@ -3991,23 +5546,143 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | Load balancer listener is not enforcing HTTPS/TLS |
 
 **Explanation:**
-This is a security risk because it allows sensitive data to be transmitted in plaintext, making it vulnerable to eavesdropping and interception by unauthorized parties. Using HTTPS/TLS encryption ensures that data remains confidential and tamper-proof during transmission. By not enforcing HTTPS/TLS, the load balancer listener is exposing the application and its users to potential security threats.
+This is a security risk because it allows data to be transmitted in plaintext, making it vulnerable to eavesdropping and tampering. Using HTTPS/TLS encryption ensures that data remains confidential and integrity is maintained. This vulnerability can be exploited by malicious actors to intercept sensitive information.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-8
 - Control Name: Transmission Confidentiality and Integrity
-- Description: The organization must protect the confidentiality and integrity of transmitted information.
+- Description: The information system protects the confidentiality and integrity of transmitted information.
 
 **Remediation:**
 ```hcl
-listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecurityPolicy-2016-08"; certificate_arn = "arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERTIFICATE_ID" }
+resource "aws_lb_listener" "example" {
+  load_balancer_arn = aws_lb.example.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = "arn:aws:acm:region:account-id:certificate/certificate-id"
+}
+```
+
+---
+
+### File: scenario_437.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | allow-db-access |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+```
+
+---
+
+### File: scenario_438.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | allow-db-access |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
+```
+
+---
+
+### File: scenario_439.tf
+
+**Violations found:** 1
+**Label:** NON_COMPLIANT
+
+#### Violation 1: unrestricted_ingress_specific_port
+
+| Field | Value |
+|---|---|
+| Resource | allow-db-access |
+| NIST Control | AC-3 |
+| Severity | HIGH |
+| Message | Security group allows unrestricted inbound on a specific port from 0.0.0.0/0 |
+
+**Explanation:**
+This is a security risk because it allows anyone from any IP address to access the specific port, potentially leading to unauthorized access or malicious activity. Unrestricted ingress can expose the system to various attacks, including denial-of-service and exploitation of vulnerabilities. It is essential to restrict access to only necessary IP addresses or ranges.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-3
+- Control Name: Access Enforcement
+- Description: The information system enforces approved authorizations for logical access to information and system resources.
+
+**Remediation:**
+```hcl
+resource "aws_security_group" "example" {
+  name        = "example-sg"
+  description = "example security group"
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+}
 ```
 
 ---
 
 ### File: scenario_012.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -4020,23 +5695,32 @@ listener { protocol = "HTTPS"; port        = "443"; ssl_policy      = "ELBSecuri
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_013.tf
 
-**Violations found:** 2  
+**Violations found:** 2
 **Label:** COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -4049,16 +5733,25 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -4073,23 +5766,32 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ### File: scenario_014.tf
 
-**Violations found:** 1  
+**Violations found:** 1
 **Label:** COMPLIANT
 
 #### Violation 1: s3_missing_encryption
@@ -4102,16 +5804,70 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 | Message | S3 bucket does not have server-side encryption configured |
 
 **Explanation:**
-This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Sensitive data, such as personal identifiable information or confidential business data, is particularly vulnerable. Encrypting data at rest is a critical security control to prevent data exposure.
+This is a security risk because without server-side encryption, data stored in the S3 bucket is not protected from unauthorized access, which could lead to data breaches and other security incidents. Server-side encryption ensures that data is encrypted at rest, making it more difficult for attackers to access sensitive information. This vulnerability could be exploited by malicious actors to steal or modify sensitive data.
 
 **NIST SP 800-53 Mapping:**
 - Control ID: SC-28
 - Control Name: Protection of Information at Rest
-- Description: The organization protects information at rest in accordance with the classification of the information.
+- Description: The organization protects the confidentiality and integrity of information at rest.
 
 **Remediation:**
 ```hcl
-aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_server_side_encryption_by_default { sse_algorithm = "AES256" } } }
+resource "aws_s3_bucket" "example" {
+  bucket = "my-bucket"
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
+```
+
+---
+
+### File: scenario_153.tf
+
+**Violations found:** 1
+**Label:** COMPLIANT
+
+#### Violation 1: wildcard_iam_policy
+
+| Field | Value |
+|---|---|
+| Resource | dynamodb_lambda_policy |
+| NIST Control | AC-6 |
+| Severity | HIGH |
+| Message | IAM policy uses wildcard (*) permissions, violating least privilege |
+
+**Explanation:**
+Using wildcard (*) permissions in an IAM policy is a security risk because it grants excessive access to resources, violating the principle of least privilege. This can lead to unauthorized access and potentially allow an attacker to exploit these permissions. It is essential to restrict permissions to only those necessary for the intended functionality.
+
+**NIST SP 800-53 Mapping:**
+- Control ID: AC-6
+- Control Name: Least Privilege
+- Description: The organization employs the principle of least privilege, allowing only authorized accesses necessary to accomplish assigned tasks.
+
+**Remediation:**
+```hcl
+resource "aws_iam_policy" "example" {
+  name        = "example-policy"
+  description = "Example policy"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeInstances",
+          "ec2:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
 ```
 
 ---
@@ -4119,28 +5875,18 @@ aws_s3_bucket.example: server_side_encryption_configuration { rule { apply_serve
 
 ## Compliance Summary
 
-This audit report identified **144 detected compliance violations** across
-**119 Terraform configuration files**. These findings are mapped to
-NIST SP 800-53 control families AC (Access Control), SC (System and Communications
-Protection), and AU (Audit and Accountability).
-
-The full evaluation scanned **478 Terraform files**, of which
-**213** were relevant to the implemented policy scope. The OPA-only
-detection layer achieved **97.5% precision**, **88.5% recall**, **92.8% F1 score**,
-and **91.5% accuracy**.
+This audit identified **157 compliance violations** across
+**128 Terraform configuration files**, mapped to
+NIST SP 800-53 control families AC (Access Control), SC (System and
+Communications Protection), and AU (Audit and Accountability).
 
 ### OPA-Only Detection Performance
 
 | Metric | Value |
 |---|---|
-| True Positives | 116 |
-| False Negatives | 15 |
-| False Positives | 3 |
-| True Negatives | 79 |
 | Precision | 97.5% |
-| Recall | 88.5% |
-| F1 Score | 92.8% |
-| Accuracy | 91.5% |
+| Recall | 87.8% |
+| F1 Score | 92.4% |
 
-*Report generated by Open-Agent Framework for IaC Compliance Analysis*  
-*Generated: 2026-06-06 18:48*
+*Report generated by Open-Agent Framework for IaC Compliance Analysis*
+*Generated: 2026-11-08 13:29*
