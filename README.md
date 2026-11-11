@@ -109,8 +109,7 @@ environment. `llm_only_baseline.py` resumes if interrupted.
 
 `scripts/annotation/` contains the code that drew the blinded random sample (seed 42) and the stratified sample,
 built the annotation sheets and computed agreement. The rubric is in `annotation/` (paper, Appendix A). The two
-annotators agreed on all 90 files. The rubric and draft annotation notes were prepared with the assistance of a large
-language model; the labels were assigned by the annotators.
+annotators agreed on all 90 files.
 
 ## Limitations
 
@@ -124,6 +123,3 @@ Al-Jabali, A., Al-Dala'ien, M.: An Open-Agent Framework for Intelligent Complian
 Code Using Large Language Models. Discover Computing (under revision). Code and data: release [tag], archived at
 [DOI].
 
-## License
-
-See `LICENSE`. The IaC-Eval benchmark is distributed under its own terms (see its original source).
